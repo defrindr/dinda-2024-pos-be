@@ -1,0 +1,76 @@
+openapi: 3.0.0
+info:
+  title: POS-Penjualan
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:8000/api/
+components:
+  securitySchemes:
+    noauthAuth:
+      type: http
+      scheme: noauth
+    bearerAuth:
+      type: http
+      scheme: bearer
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                username: admin
+                password: password
+      security:
+        - noauthAuth: []
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/me:
+    post:
+      tags:
+        - Auth
+      summary: Me
+      description: Get information about loggedin user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
+  /auth/logout:
+    post:
+      tags:
+        - Auth
+      summary: Logout
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: Accept
+          in: header
+          schema:
+            type: string
+          example: application/json
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json: {}
