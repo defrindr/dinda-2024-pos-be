@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Master;
 use App\Helpers\PaginationHelper;
 use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryRequest;
 use App\Http\Resources\CategoryCollection;
+use App\Http\Services\CategoryService;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -14,18 +16,9 @@ class CategoryController extends Controller
 {
     public function index(Request $request)
     {
-        // prepare parameter
-        $keyword = $request->get('search');
-        $perPage = PaginationHelper::perPage($request);
-        $sort    = PaginationHelper::sortCondition($request, PaginationHelper::SORT_DESC);
-
-        // query database
-        $pagination = Category::orderBy('id', $sort)
-            ->search($keyword)
-            ->paginate($perPage);
-
-        // response
-        return ResponseHelper::successWithData(new CategoryCollection($pagination));
+        // response pagination
+        $pagination = CategoryService::paginate($request);
+        return ResponseHelper::successWithData($pagination);
     }
 
     public function show(Category $category)
@@ -33,15 +26,13 @@ class CategoryController extends Controller
         return ResponseHelper::successWithData($category, 'Data found');
     }
 
-    public function store(Request $request)
+    public function store(CategoryRequest $request)
     {
-        // mendapatkan parameter
-        $payloads = $request->only('name', 'parent_id');
-
         try {
-            // menambahkan data sesuai payload
-            Category::create($payloads);
-            return ResponseHelper::successWithData(null, 'Kategori berhasil dibuat');
+            $successSaveCategory = CategoryService::create($request);
+            if ($successSaveCategory)
+                return ResponseHelper::successWithData(null, 'Kategori berhasil dibuat');
+            else return ResponseHelper::badRequest(null, 'Gagal menyimpan data');
         } catch (\Throwable $th) {
             // simpan log untuk tracing error
             Log::error($th->getMessage());
@@ -49,15 +40,13 @@ class CategoryController extends Controller
         }
     }
 
-    public function update(Request $request, Category $category)
+    public function update(CategoryRequest $request, Category $category)
     {
-        // mendapatkan parameter
-        $payloads = $request->only('name', 'parent_id');
-
         try {
-            // ubah data yang dipilih, sesuai dengan payload
-            $category->update($payloads);
-            return ResponseHelper::successWithData(null, 'Kategori berhasil diubah');
+            $successUpdateCategory = CategoryService::update($category, $request);
+            if ($successUpdateCategory)
+                return ResponseHelper::successWithData(null, 'Kategori berhasil diubah');
+            else return ResponseHelper::badRequest(null, 'Gagal mengubah data');
         } catch (\Throwable $th) {
             // simpan log untuk tracing error
             Log::error($th->getMessage());

@@ -2,90 +2,90 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ResponseHelper;
+use App\Http\Requests\UserRequest;
+use App\Http\Services\UserService;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
-    function __construct()
+    /**
+     * Mendapatkan data seluruh pengguna
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function index(Request $request)
     {
-        $this->middleware('auth:api');
+        return UserService::paginate($request);
     }
 
-    public function index()
-    {
-        $pagination = User::orderBy('id', 'desc')->paginate(20);
-        return response()->json($pagination);
-    }
-
+    /**
+     * Mendapatkan pengguna dengan berdasarkan {id}
+     * @param User $user
+     * @return JsonResponse
+     */
     public function show(User $user)
     {
-        return response()->json(['data' => $user, 'message' => 'Pengguna ditemukan']);
+        // response
+        return ResponseHelper::successWithData($user, 'Pengguna ditemukan');
     }
 
-    public function store(Request $request)
+    /**
+     * Menambahkan user baru ke aplikasi
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(UserRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|min:6',
-            'role' => "required|in:" . implode(",", array_keys(User::listRoles()))
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->messages()->first()], 400);
-        }
-
-        $payloads = $request->only('name', 'email', 'password', 'role');
-        $payloads['password'] = Hash::make($payloads['password']);
-
+        // simpan ke database
         try {
-            User::create($payloads);
-            return response()->json(['message' => 'User berhasil dibuat'], 200);
+            $success = UserService::create($request);
+
+            if ($success)
+                return ResponseHelper::successWithData(null, 'User berhasil dibuat', 201);
+            else return ResponseHelper::badRequest(null, 'Gagal menambahkan data !');
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
-            return response()->json(['message' => 'Terjadi kesalahan saat menjalankan aksi'], 400);
+            return ResponseHelper::error($th, 'Terjadi kesalahan saat menjalankan aksi');
         }
     }
 
-    public function update(Request $request, User $user)
+    /**
+     * Mengubah data pengguna dengan berdasarkan {id}
+     * @param Request $request
+     * @param User $user
+     * @return JsonResponse
+     */
+    public function update(UserRequest $request, User $user)
     {
-        $validator = Validator::make($request->all(), [
-            'username' => 'unique:users,username, ' . $user->id,
-            'email' => 'email|unique:users,email, ' . $user->id,
-            'password' => 'min:6',
-            'role' => "in:" . implode(",", array_keys(User::listRoles()))
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['message' => $validator->messages()->first()], 400);
-        }
-
-        $payloads = $request->only('name', 'email', 'password', 'role');
-        if (isset($payloads['password'])) {
-            $payloads['password'] = Hash::make($payloads['password']);
-        }
-
+        // simpan ke database
         try {
-            $user->update($payloads);
-            return response()->json(['message' => 'User berhasil diubah'], 200);
+            $success = UserService::update($user, $request);
+
+            if ($success)
+                return ResponseHelper::successWithData(null, 'User berhasil diubah');
+            return ResponseHelper::badRequest(null, 'Gagal mengubah data !');
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
-            return response()->json(['message' => 'Terjadi kesalahan saat menjalankan aksi'], 400);
+            return ResponseHelper::error($th, 'Terjadi kesalahan saat menjalankan aksi');
         }
     }
 
+    /**
+     * Menghapus data user berdasarkan dengan {id}
+     * @param User $user
+     * @return JsonResponse
+     */
     public function destroy(User $user)
     {
         try {
             $user->delete();
-            return response()->json(['message' => 'User berhasil dihapus'], 200);
+            return ResponseHelper::successWithData(null, 'User berhasil dihapus');
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
-            return response()->json(['message' => 'Terjadi kesalahan saat menjalankan aksi'], 400);
+            return ResponseHelper::error($th, 'Terjadi kesalahan saat menjalankan aksi');
         }
     }
 }

@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 class ResponseHelper
@@ -31,14 +32,23 @@ class ResponseHelper
 
   public static function error(Throwable $throwable, $message = null)
   {
+
+    if ($throwable instanceof HttpException) {
+      $message = $throwable->getMessage();
+      $code = $throwable->getStatusCode();
+    } else {
+      $message = $message ?? $throwable->getMessage();
+      $code = 500;
+    }
+
     $body = [
-      'message' => $message ?? $throwable->getMessage(),
+      'message' => $message,
       'errors' => [
         'description' => $throwable,
         'class' => get_class($throwable),
       ]
     ];
-    return static::response($body, 500);
+    return static::response($body, $code);
   }
 
   public static function unAuthorization()
@@ -63,9 +73,9 @@ class ResponseHelper
     return static::response($body, 200);
   }
 
-  public static function successWithData($data, $message = 'Success get data')
+  public static function successWithData($data, $message = 'Success get data', $statusCode = 200)
   {
-    return static::response(['message' => $message, 'data' => $data], 200);
+    return static::response(['message' => $message, 'data' => $data], $statusCode);
   }
 
   public static function modelNotFound($message = null)

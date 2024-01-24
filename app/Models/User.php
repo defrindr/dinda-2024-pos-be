@@ -2,10 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
@@ -74,5 +75,41 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims()
     {
         return [];
+    }
+
+    public function scopeSearch(Builder $query, string|null $search)
+    {
+        if ($search) {
+
+            $query->where(function ($query) use ($search) {
+                $query->where('username', 'like', "%$search%")
+                    ->orWhere('name', 'like', "%$search%")
+                    ->orWhere('email', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%");
+            });
+        }
+    }
+
+    public static function listRoles()
+    {
+        return [
+            self::LEVEL_ADMIN => self::LEVEL_ADMIN,
+            self::LEVEL_KASIR => self::LEVEL_KASIR,
+            self::LEVEL_SUPPLIER => self::LEVEL_SUPPLIER,
+        ];
+    }
+
+    public static function getRelativeAvatarPath()
+    {
+        return 'avatars/';
+    }
+
+    /**
+     * Mendapatkan nama tabel
+     * @return string
+     */
+    public static function getTableName()
+    {
+        return with(new static)->getTable();
     }
 }
