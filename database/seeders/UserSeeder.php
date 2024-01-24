@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
             'name'     => 'John Doe',
             'phone'    => '628560162537',
             'photo'    => 'default.png',
-            'level'    => User::LEVEL_ADMIN
+            'role'    => User::LEVEL_ADMIN
         ]);
     }
 }

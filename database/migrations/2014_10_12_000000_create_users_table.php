@@ -23,7 +23,7 @@ class CreateUsersTable extends Migration
             $table->string('email');
             $table->string('phone');
             $table->string('photo');
-            $table->enum('level', ['Kasir', 'Admin', 'Manager']);
+            $table->enum('role', ['Kasir', 'Admin', 'Manager']);
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

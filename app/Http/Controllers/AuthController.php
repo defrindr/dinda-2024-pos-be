@@ -51,6 +51,14 @@ class AuthController extends Controller
   }
 
   /**
+   * Melakukan refresh token, ketika sudah expired
+   */
+  public function refresh()
+  {
+    return $this->respondWithToken(auth()?->refresh());
+  }
+
+  /**
    * Logout dari aplikasi
    */
   public function logout()
@@ -67,7 +75,7 @@ class AuthController extends Controller
     return ResponseHelper::success([
       'access_token' => $token,
       'token_type' => 'bearer',
-      'expires_in' => auth('api')?->factory()->getTTL() * 60
+      'expires_in' => auth('api')?->factory()?->getTTL() * 60
     ]);
   }
 }

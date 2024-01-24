@@ -31,7 +31,7 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'phone',
         'photo',
-        'level'
+        'role'
     ];
 
     /**
@@ -55,7 +55,6 @@ class User extends Authenticatable implements JWTSubject
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime'
     ];
-
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.

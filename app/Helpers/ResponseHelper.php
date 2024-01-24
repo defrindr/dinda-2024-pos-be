@@ -14,6 +14,7 @@ class ResponseHelper
     if (config('app.env') !== 'production') {
       $content = array_merge($content, [
         'timestamps' => time(),
+        'executionTime' => round(microtime(true) - LARAVEL_START, 3),
         'environment' => config('app.env'),
         'request' => request()->all(),
       ]);
@@ -28,9 +29,15 @@ class ResponseHelper
     return static::response($body, 422);
   }
 
-  public static function error(Throwable $throwable)
+  public static function error(Throwable $throwable, $message = null)
   {
-    $body = ['message' => $throwable->getMessage(), 'trace' => $throwable->getTrace()];
+    $body = [
+      'message' => $message ?? $throwable->getMessage(),
+      'errors' => [
+        'description' => $throwable,
+        'class' => get_class($throwable),
+      ]
+    ];
     return static::response($body, 500);
   }
 
@@ -59,5 +66,10 @@ class ResponseHelper
   public static function successWithData($data, $message = 'Success get data')
   {
     return static::response(['message' => $message, 'data' => $data], 200);
+  }
+
+  public static function modelNotFound($message = null)
+  {
+    return static::response(['message' => $message ?? 'Data yang anda cari tidak tersedia.'], 404);
   }
 }

@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Categories extends Model
+class Category extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -17,4 +18,9 @@ class Categories extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
+
+    public function scopeSearch(Builder $query, string|null $search)
+    {
+        $query?->where('name', 'like', "$search%");
+    }
 }
