@@ -41,10 +41,10 @@ class UserService
   public static function create(Request $request): bool
   {
     // spesifikan kolom yang akan di gunakan
-    $payloads = $request->only('username', 'password', 'code', 'name', 'email', 'phone', 'photo', 'role');
+    $payload = $request->only('username', 'password', 'code', 'name', 'email', 'phone', 'photo', 'role');
 
     // convert password ke hash
-    $payloads['password'] = Hash::make($payloads['password']);
+    $payload['password'] = Hash::make($payload['password']);
 
     // unggah gambar
     $responseUpload = RequestHelper::uploadImage($request->file('photo'), User::getRelativeAvatarPath());
@@ -53,10 +53,10 @@ class UserService
       throw new BadRequestHttpException('Gagal mengunggah gambar');
     }
 
-    $payloads['photo'] = $responseUpload['fileName'];
+    $payload['photo'] = $responseUpload['fileName'];
 
     // simpan ke database
-    return User::create($payloads);
+    return User::create($payload) ? true : false;
   }
 
 
@@ -68,25 +68,25 @@ class UserService
   public static function update(User $user, Request $request): bool
   {
     // spesifikan kolom yang akan di update
-    $payloads = $request->only('code', 'name', 'username', 'email', 'phone', 'password', 'photo', 'role');
+    $payload = $request->only('code', 'name', 'username', 'email', 'phone', 'password', 'photo', 'role');
 
     // jika terdapat password, maka convert ke hash
-    if (isset($payloads['password'])) {
-      $payloads['password'] = Hash::make($payloads['password']);
+    if (isset($payload['password'])) {
+      $payload['password'] = Hash::make($payload['password']);
     } else {
-      $payloads['password'] = $user->password;
+      $payload['password'] = $user->password;
     }
 
     // simpan foto ke storage
     if ($request->hasFile('photo')) {
       $responseUpload = RequestHelper::uploadImage($request->file('photo'), User::getRelativeAvatarPath(), $user->photo);
       if (!$responseUpload['success']) throw new BadRequestHttpException('Gambar gagal diunggah');
-      $payloads['photo'] = $responseUpload['fileName'];
+      $payload['photo'] = $responseUpload['fileName'];
     } else {
-      $payloads['photo'] = $user->photo;
+      $payload['photo'] = $user->photo;
     }
 
     // update user di database
-    return $user->update($payloads);
+    return $user->update($payload);
   }
 }

@@ -47,7 +47,7 @@ class CategoryService
     $isDataExist = Category::where(['name' => $payload['name']])->first();
     if ($isDataExist) throw new BadRequestHttpException("Kategori dengan nama {$payload['name']} telah tersedia.");
 
-    return Category::create($payload);
+    return Category::create($payload) ? true : false;
   }
 
 

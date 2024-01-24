@@ -27,5 +27,13 @@ class Pelanggan extends BaseModel
 
     public function scopeSearch(Builder $query, string|null $search)
     {
+        if ($search) {
+            $query->where(function ($query) use ($search) {
+                $query->where('code', 'like', "%$search%")
+                    ->orWhere('name', 'like', "%$search%")
+                    ->orWhere('phone', 'like', "%$search%")
+                    ->orWhere('address', 'like', "%$search%");
+            });
+        }
     }
 }

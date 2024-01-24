@@ -2,16 +2,16 @@
 
 namespace Database\Seeders;
 
-use App\Models\Category;
+use App\Models\Pelanggan;
 use Illuminate\Database\Seeder;
 
-class CategorySeeder extends Seeder
+class PelangganSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        Category::factory(100)->create();
+        Pelanggan::factory(500)->create();
     }
 }
