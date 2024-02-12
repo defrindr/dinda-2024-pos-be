@@ -42,7 +42,6 @@ return [
         ],
     ],
 
-
     'guards' => [
         'api' => [
             'driver' => 'jwt',

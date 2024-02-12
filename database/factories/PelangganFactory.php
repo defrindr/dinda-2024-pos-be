@@ -19,9 +19,10 @@ class PelangganFactory extends Factory
         $number = rand(1, 9999);
         $gender = ['L', 'P'];
         $statuses = ['active', 'nonactive'];
+
         return [
-            'code' => 'PLG0000' . $number,
-            'name' => 'Pelanggan ' . $number,
+            'code' => 'PLG0000'.$number,
+            'name' => 'Pelanggan '.$number,
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'gender' => $gender[rand(0, 1)],

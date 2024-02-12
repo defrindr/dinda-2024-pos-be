@@ -18,6 +18,11 @@ class ProfilAplikasi extends BaseModel
 
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
+
+    public static function getRelativePath()
+    {
+        return 'applogo/';
+    }
 }

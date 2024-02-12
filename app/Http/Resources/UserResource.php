@@ -16,7 +16,8 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         $parent = parent::toArray($request);
-        $parent['photo'] = asset_storage(User::getRelativeAvatarPath() . $this->photo);
+        $parent['photo'] = asset_storage(User::getRelativeAvatarPath().$this->photo);
+
         return $parent;
     }
 }

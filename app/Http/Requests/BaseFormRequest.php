@@ -9,26 +9,25 @@ use Illuminate\Validation\ValidationException;
 
 class BaseFormRequest extends FormRequest
 {
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return true;
+    }
 
-  /**
-   * Determine if the user is authorized to make this request.
-   */
-  public function authorize(): bool
-  {
-    return true;
-  }
+    /**
+     * Write custom error response for API
+     *
+     * @return void
+     */
+    protected function failedValidation(Validator $validator)
+    {
+        $response = ResponseHelper::validationError($validator->errors());
 
-  /**
-   * Write custom error response for API
-   * @param Validator $validator
-   * @return void
-   */
-  protected function failedValidation(Validator $validator)
-  {
-    $response = ResponseHelper::validationError($validator->errors());
-
-    throw (new ValidationException($validator, $response))
-      ->errorBag($this->errorBag)
-      ->redirectTo($this->getRedirectUrl());
-  }
+        throw (new ValidationException($validator, $response))
+            ->errorBag($this->errorBag)
+            ->redirectTo($this->getRedirectUrl());
+    }
 }

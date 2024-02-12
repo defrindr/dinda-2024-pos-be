@@ -17,11 +17,11 @@ class UserCollection extends ResourceCollection
         return [
             'items' => UserResource::collection($this->collection),
             'meta' => [
-                "currentPage" =>  $this->currentPage(),
-                "total" =>  $this->total(),
-                "perPage" =>  $this->perPage(),
-                "path" =>  $this->path(),
-                "totalPage" =>  ceil($this->total() / $this->perPage()),
+                'currentPage' => $this->currentPage(),
+                'total' => $this->total(),
+                'perPage' => $this->perPage(),
+                'path' => $this->path(),
+                'totalPage' => ceil($this->total() / $this->perPage()),
             ],
         ];
     }

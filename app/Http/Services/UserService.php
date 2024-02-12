@@ -13,80 +13,82 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class UserService
 {
-  /**
-   * Fungsi untuk melakukan paginasi dan filter list data
-   * @param Request $request request dari pengguna
-   */
-  public static function paginate(Request $request): ResourceCollection
-  {
-    // prepare parameter query
-    $keyword = $request->get('search');
-    $perPage = PaginationHelper::perPage($request);
-    $sort    = PaginationHelper::sortCondition($request, PaginationHelper::SORT_DESC);
+    /**
+     * Fungsi untuk melakukan paginasi dan filter list data
+     *
+     * @param  Request  $request  request dari pengguna
+     */
+    public static function paginate(Request $request): ResourceCollection
+    {
+        // prepare parameter query
+        $keyword = $request->get('search');
+        $perPage = PaginationHelper::perPage($request);
+        $sort = PaginationHelper::sortCondition($request, PaginationHelper::SORT_DESC);
 
-    // query database
-    $pagination = User::orderBy('id', $sort)
-      ->search($keyword)
-      ->paginate($perPage);
+        // query database
+        $pagination = User::orderBy('id', $sort)
+            ->search($keyword)
+            ->paginate($perPage);
 
-    // collect pagination
-    return new UserCollection($pagination);
-  }
-
-  /**
-   * Fungsi untuk menambahkan data baru
-   * @param Request $request request dari pengguna
-   * @return bool
-   */
-  public static function create(Request $request): bool
-  {
-    // spesifikan kolom yang akan di gunakan
-    $payload = $request->only('username', 'password', 'code', 'name', 'email', 'phone', 'photo', 'role');
-
-    // convert password ke hash
-    $payload['password'] = Hash::make($payload['password']);
-
-    // unggah gambar
-    $responseUpload = RequestHelper::uploadImage($request->file('photo'), User::getRelativeAvatarPath());
-
-    if (!$responseUpload['success']) {
-      throw new BadRequestHttpException('Gagal mengunggah gambar');
+        // collect pagination
+        return new UserCollection($pagination);
     }
 
-    $payload['photo'] = $responseUpload['fileName'];
+    /**
+     * Fungsi untuk menambahkan data baru
+     *
+     * @param  Request  $request  request dari pengguna
+     */
+    public static function create(Request $request): bool
+    {
+        // spesifikan kolom yang akan di gunakan
+        $payload = $request->only('username', 'password', 'code', 'name', 'email', 'phone', 'photo', 'role');
 
-    // simpan ke database
-    return User::create($payload) ? true : false;
-  }
+        // convert password ke hash
+        $payload['password'] = Hash::make($payload['password']);
 
+        // unggah gambar
+        $responseUpload = RequestHelper::uploadImage($request->file('photo'), User::getRelativeAvatarPath());
 
-  /**
-   * Fungsi untuk mengubah data
-   * @param Request $request request dari pengguna
-   * @return bool
-   */
-  public static function update(User $user, Request $request): bool
-  {
-    // spesifikan kolom yang akan di update
-    $payload = $request->only('code', 'name', 'username', 'email', 'phone', 'password', 'photo', 'role');
+        if (! $responseUpload['success']) {
+            throw new BadRequestHttpException('Gagal mengunggah gambar');
+        }
 
-    // jika terdapat password, maka convert ke hash
-    if (isset($payload['password'])) {
-      $payload['password'] = Hash::make($payload['password']);
-    } else {
-      $payload['password'] = $user->password;
+        $payload['photo'] = $responseUpload['fileName'];
+
+        // simpan ke database
+        return User::create($payload) ? true : false;
     }
 
-    // simpan foto ke storage
-    if ($request->hasFile('photo')) {
-      $responseUpload = RequestHelper::uploadImage($request->file('photo'), User::getRelativeAvatarPath(), $user->photo);
-      if (!$responseUpload['success']) throw new BadRequestHttpException('Gambar gagal diunggah');
-      $payload['photo'] = $responseUpload['fileName'];
-    } else {
-      $payload['photo'] = $user->photo;
-    }
+    /**
+     * Fungsi untuk mengubah data
+     *
+     * @param  Request  $request  request dari pengguna
+     */
+    public static function update(User $user, Request $request): bool
+    {
+        // spesifikan kolom yang akan di update
+        $payload = $request->only('code', 'name', 'username', 'email', 'phone', 'password', 'photo', 'role');
 
-    // update user di database
-    return $user->update($payload);
-  }
+        // jika terdapat password, maka convert ke hash
+        if (isset($payload['password'])) {
+            $payload['password'] = Hash::make($payload['password']);
+        } else {
+            $payload['password'] = $user->password;
+        }
+
+        // simpan foto ke storage
+        if ($request->hasFile('photo')) {
+            $responseUpload = RequestHelper::uploadImage($request->file('photo'), User::getRelativeAvatarPath(), $user->photo);
+            if (! $responseUpload['success']) {
+                throw new BadRequestHttpException('Gambar gagal diunggah');
+            }
+            $payload['photo'] = $responseUpload['fileName'];
+        } else {
+            $payload['photo'] = $user->photo;
+        }
+
+        // update user di database
+        return $user->update($payload);
+    }
 }

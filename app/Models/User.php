@@ -6,16 +6,17 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Http\Request;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    const LEVEL_ADMIN = 'Admin';
-    const LEVEL_KASIR = 'Kasir';
-    const LEVEL_SUPPLIER = 'Supplier';
+    const LEVEL_ADMIN = 'ADMIN';
+
+    const LEVEL_KASIR = 'KASIR';
+
+    const LEVEL_MANAGER = 'MANAGER';
 
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
@@ -32,7 +33,7 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'phone',
         'photo',
-        'role'
+        'role',
     ];
 
     /**
@@ -54,7 +55,7 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'deleted_at' => 'datetime'
+        'deleted_at' => 'datetime',
     ];
 
     /**
@@ -77,7 +78,7 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function scopeSearch(Builder $query, string|null $search)
+    public function scopeSearch(Builder $query, ?string $search)
     {
         if ($search) {
 
@@ -95,7 +96,7 @@ class User extends Authenticatable implements JWTSubject
         return [
             self::LEVEL_ADMIN => self::LEVEL_ADMIN,
             self::LEVEL_KASIR => self::LEVEL_KASIR,
-            self::LEVEL_SUPPLIER => self::LEVEL_SUPPLIER,
+            self::LEVEL_MANAGER => self::LEVEL_MANAGER,
         ];
     }
 
@@ -106,6 +107,7 @@ class User extends Authenticatable implements JWTSubject
 
     /**
      * Mendapatkan nama tabel
+     *
      * @return string
      */
     public static function getTableName()

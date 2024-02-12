@@ -2,67 +2,95 @@
 
 namespace App\Http\Controllers\Master;
 
-use App\Helpers\PaginationHelper;
 use App\Helpers\ResponseHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryRequest;
-use App\Http\Resources\CategoryCollection;
+use App\Http\Resources\CategoryResource;
 use App\Http\Services\CategoryService;
 use App\Models\Category;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
-    public function index(Request $request)
+    /**
+     * Menampilkan data kategori dengan paginasi
+     */
+    public function index(Request $request): JsonResponse
     {
         // response pagination
         $pagination = CategoryService::paginate($request);
+
         return ResponseHelper::successWithData($pagination);
     }
 
-    public function show(Category $category)
+    /**
+     * Menampilkan data kategori sesuai dengan parameter [id]
+     */
+    public function show(Category $category): JsonResponse
     {
-        return ResponseHelper::successWithData($category, 'Data found');
+        return ResponseHelper::successWithData(
+            new CategoryResource($category),
+            'Data kategori berhasil ditemukan'
+        );
     }
 
-    public function store(CategoryRequest $request)
+    /**
+     * Menambahkan data kategori baru
+     */
+    public function store(CategoryRequest $request): JsonResponse
     {
         try {
-            $successSaveCategory = CategoryService::create($request);
-            if ($successSaveCategory)
-                return ResponseHelper::successWithData(null, 'Kategori berhasil dibuat');
-            else return ResponseHelper::badRequest(null, 'Gagal menyimpan data');
+            if (CategoryService::create($request)) {
+                return ResponseHelper::successWithData(null, 'Kategori berhasil dibuat', 201);
+            } else {
+                return ResponseHelper::badRequest(null, 'Gagal menyimpan data');
+            }
         } catch (\Throwable $th) {
             // simpan log untuk tracing error
             Log::error($th->getMessage());
+
             return ResponseHelper::error($th, 'Terjadi kesalahan saat menjalankan aksi');
         }
     }
 
-    public function update(CategoryRequest $request, Category $category)
+    /**
+     * Melakukan modifikasi terhadap kategori yang dipilih
+     *
+     * @param  Category  $category  Kategori yang ingin diubah
+     */
+    public function update(CategoryRequest $request, Category $category): JsonResponse
     {
         try {
-            $successUpdateCategory = CategoryService::update($category, $request);
-            if ($successUpdateCategory)
+            if (CategoryService::update($category, $request)) {
                 return ResponseHelper::successWithData(null, 'Kategori berhasil diubah');
-            else return ResponseHelper::badRequest(null, 'Gagal mengubah data');
+            } else {
+                return ResponseHelper::badRequest(null, 'Gagal mengubah data');
+            }
         } catch (\Throwable $th) {
             // simpan log untuk tracing error
             Log::error($th->getMessage());
+
             return ResponseHelper::error($th, 'Terjadi kesalahan saat menjalankan aksi');
         }
     }
 
-    public function destroy(Category $category)
+    /**
+     * Menghapus kategori yang dipilih
+     *
+     * @param  Category  $category  Kategori yang dipilih
+     */
+    public function destroy(Category $category): JsonResponse
     {
         try {
-            // hapus data
             $category->delete();
-            return response()->json(['message' => 'Kategori berhasil dihapus'], 200);
+
+            return ResponseHelper::successWithData(null, 'Kategori berhasil dihapus');
         } catch (\Throwable $th) {
             // simpan log untuk tracing error
             Log::error($th->getMessage());
+
             return ResponseHelper::error($th, 'Terjadi kesalahan saat menjalankan aksi');
         }
     }

@@ -17,10 +17,11 @@ class CreatePelanggansTable extends Migration
             $table->id();
             $table->string('code');
             $table->string('name');
-            $table->string('phone');
-            $table->text('address');
+            $table->binary('phone');
+            $table->binary('address');
+            $table->binary('dob');
             $table->enum('gender', ['L', 'P']);
-            $table->date('dob');
+            $table->string('salt');
             $table->enum('status', ['active', 'nonactive']);
             $table->timestamps();
             $table->softDeletes();

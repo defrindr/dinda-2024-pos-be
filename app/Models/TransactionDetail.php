@@ -11,13 +11,22 @@ class TransactionDetail extends BaseModel
 
     protected $fillable = [
         'product_id',
-        'no_invoice',
+        'transaction_id',
         'price',
         'quantity',
+        'total_price',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
-        'updated_at' => 'datetime'
+        'updated_at' => 'datetime',
     ];
+
+    /**
+     * relation to table product
+     */
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

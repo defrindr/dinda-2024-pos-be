@@ -16,6 +16,10 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CategorySeeder::class,
             PelangganSeeder::class,
+            SupplierSeeder::class,
+            ProductSeeder::class,
+            ProfilAplikasiSeeder::class,
+            TransactionSeeder::class,
         ]);
     }
 }

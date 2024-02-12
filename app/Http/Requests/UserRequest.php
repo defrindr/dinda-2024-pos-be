@@ -17,12 +17,12 @@ class UserRequest extends BaseFormRequest
         $rules = [
             'username' => 'required|unique:users,username',
             'password' => 'required|min:6',
-            'code'     => 'required|min:8',
-            'name'     => 'required|min:4',
-            'email'    => 'required|email',
-            'phone'    => 'required|min:10,max:13',
-            'photo'    => 'required|file',
-            'role'     => "required|in:" . implode(",", array_keys(User::listRoles()))
+            'code' => 'required|min:8',
+            'name' => 'required|min:4',
+            'email' => 'required|email',
+            'phone' => 'required|min:10,max:13',
+            'photo' => 'required|file|mimes:jpg,png,gif',
+            'role' => 'required|in:'.implode(',', array_keys(User::listRoles())),
         ];
 
         if (in_array($this->method(), ['PUT', 'PATCH'])) {
@@ -33,16 +33,8 @@ class UserRequest extends BaseFormRequest
                 'min:5',
                 Rule::unique(User::getTableName())->ignore($user),
             ];
-            $rules['photo'] = [
-                'file',
-                'nullable',
-                'mimes:jpg,png,gif'
-            ];
-            $rules['password'] = [
-                'nullable',
-                'string',
-                'min:8'
-            ];
+            $rules['photo'] = 'file|nullable|mimes:jpg,png,gif';
+            $rules['password'] = 'nullable|string|min:8';
         }
 
         return $rules;

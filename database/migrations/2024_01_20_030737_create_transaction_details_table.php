@@ -16,9 +16,10 @@ class CreateTransactionDetailsTable extends Migration
         Schema::create('transaction_details', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->references('id')->on('products');
-            $table->string('no_invoice');
-            $table->decimal('price');
+            $table->foreignId('transaction_id')->references('id')->on('transactions');
+            $table->unsignedBigInteger('price')->nullable();
             $table->integer('quantity');
+            $table->unsignedBigInteger('total_price')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

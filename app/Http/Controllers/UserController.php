@@ -13,7 +13,7 @@ class UserController extends Controller
 {
     /**
      * Mendapatkan data seluruh pengguna
-     * @param Request $request
+     *
      * @return JsonResponse
      */
     public function index(Request $request)
@@ -23,7 +23,7 @@ class UserController extends Controller
 
     /**
      * Mendapatkan pengguna dengan berdasarkan {id}
-     * @param User $user
+     *
      * @return JsonResponse
      */
     public function show(User $user)
@@ -34,7 +34,8 @@ class UserController extends Controller
 
     /**
      * Menambahkan user baru ke aplikasi
-     * @param Request $request
+     *
+     * @param  Request  $request
      * @return JsonResponse
      */
     public function store(UserRequest $request)
@@ -43,19 +44,22 @@ class UserController extends Controller
         try {
             $success = UserService::create($request);
 
-            if ($success)
+            if ($success) {
                 return ResponseHelper::successWithData(null, 'User berhasil dibuat', 201);
-            else return ResponseHelper::badRequest(null, 'Gagal menambahkan data !');
+            } else {
+                return ResponseHelper::badRequest(null, 'Gagal menambahkan data !');
+            }
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
+
             return ResponseHelper::error($th, 'Terjadi kesalahan saat menjalankan aksi');
         }
     }
 
     /**
      * Mengubah data pengguna dengan berdasarkan {id}
-     * @param Request $request
-     * @param User $user
+     *
+     * @param  Request  $request
      * @return JsonResponse
      */
     public function update(UserRequest $request, User $user)
@@ -64,27 +68,32 @@ class UserController extends Controller
         try {
             $success = UserService::update($user, $request);
 
-            if ($success)
+            if ($success) {
                 return ResponseHelper::successWithData(null, 'User berhasil diubah');
+            }
+
             return ResponseHelper::badRequest(null, 'Gagal mengubah data !');
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
+
             return ResponseHelper::error($th, 'Terjadi kesalahan saat menjalankan aksi');
         }
     }
 
     /**
      * Menghapus data user berdasarkan dengan {id}
-     * @param User $user
+     *
      * @return JsonResponse
      */
     public function destroy(User $user)
     {
         try {
             $user->delete();
+
             return ResponseHelper::successWithData(null, 'User berhasil dihapus');
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
+
             return ResponseHelper::error($th, 'Terjadi kesalahan saat menjalankan aksi');
         }
     }
