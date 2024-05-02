@@ -19,25 +19,68 @@ class ProductService
      */
     public static function paginate(Request $request)
     {
-        // prepare parameter
-        $keyword = $request->get('search');
-        $perPage = PaginationHelper::perPage($request);
-        $sort = PaginationHelper::sortCondition($request, PaginationHelper::SORT_DESC);
+        $products = Product::orderBy('name', 'asc')->get();
 
-        // query database
-        $pagination = Product::orderBy('id', $sort)
-            ->search($keyword)
-            ->paginate($perPage);
+        $all_products = [];
+        if ($request->get('search')) {
+            $selected_products = self::binarySearch($products, $request->get('search'));
+            // dd($selected_products);
 
-        return new ProductCollection($pagination);
+
+            if ($selected_products !== -1) {
+                $all_products[] = $products[$selected_products];
+            }
+        } else {
+            $all_products = $products;
+        }
+
+        return new ProductCollection($all_products);
     }
+
+    private static function binarySearch($arr, $x)
+    {
+        $l = 0;
+        $r = count($arr);
+        // Loop to implement Binary Search 
+        while ($l <= $r) {
+
+            // Calculatiing mid 
+            $m = $l + (int)(($r - $l) / 2);
+            if ($m == count($arr)) {
+                return -1;
+            }
+
+            // if (count($arr) < 100)
+            //     print($arr . "\n\n\n\n");
+            // print($l . " " . $r . "<br/><br/>");
+            $maxLength = strlen($arr[$m]->name) > strlen($x) ? strlen($x) : strlen($arr[$m]->name);
+
+            $res = strncmp(strtolower($x), strtolower($arr[$m]->name),  $maxLength);
+            // print("{$arr[$m]->name}\n{$x}\n$res");
+
+            // Check if x is present at mid 
+            if ($res == 0)
+                return $m;
+
+            // If x greater, ignore left half 
+            if ($res > 0)
+                $l = $m + 1;
+
+            // If x is smaller, ignore right half 
+            else
+                $r = $m - 1;
+        }
+
+        return -1;
+    }
+
 
     public static function create(Request $request): bool
     {
         $payload = $request->only('category_id', 'code', 'name', 'unit', 'stock', 'price_buy', 'price_sell', 'description', 'date');
 
         $responseUpload = RequestHelper::uploadImage($request->file('photo'), Product::getRelativePath());
-        if (! $responseUpload['success']) {
+        if (!$responseUpload['success']) {
             throw new BadRequestHttpException('Gagal mengunggah gambar');
         }
 
@@ -51,7 +94,7 @@ class ProductService
         $payload = $request->only('category_id', 'code', 'name', 'unit', 'stock', 'price_buy', 'price_sell', 'description', 'date');
         if ($request->hasFile('photo')) {
             $responseUpload = RequestHelper::uploadImage($request->file('photo'), Product::getRelativePath());
-            if (! $responseUpload['success']) {
+            if (!$responseUpload['success']) {
                 throw new BadRequestHttpException('Gagal mengunggah gambar');
             }
 

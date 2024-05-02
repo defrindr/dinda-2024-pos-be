@@ -16,13 +16,13 @@ class ProductCollection extends ResourceCollection
     {
         return [
             'items' => ProductResource::collection($this->collection),
-            'meta' => [
-                'currentPage' => $this->currentPage(),
-                'total' => $this->total(),
-                'perPage' => $this->perPage(),
-                'path' => $this->path(),
-                'totalPage' => ceil($this->total() / $this->perPage()),
-            ],
+            // 'meta' => [
+            //     'currentPage' => $this->currentPage(),
+            //     'total' => $this->total(),
+            //     'perPage' => $this->perPage(),
+            //     'path' => $this->path(),
+            //     'totalPage' => ceil($this->total() / $this->perPage()),
+            // ],
         ];
     }
 }
