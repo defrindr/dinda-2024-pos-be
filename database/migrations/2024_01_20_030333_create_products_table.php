@@ -18,10 +18,14 @@ class CreateProductsTable extends Migration
             $table->foreignId('category_id')->references('id')->on('categories');
             $table->string('code');
             $table->string('name');
-            $table->string('unit');
             $table->integer('stock');
+            $table->string('unit');
+            $table->integer('per_pack');
+            $table->integer('per_item')->default(1);
+            $table->string('unit_item');
             $table->decimal('price_buy');
             $table->decimal('price_sell');
+            $table->decimal('price_sell_item');
             $table->text('description');
             $table->date('date');
             $table->string('photo');

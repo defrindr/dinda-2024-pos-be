@@ -21,6 +21,10 @@ class Product extends BaseModel
         'description',
         'date',
         'photo',
+        'per_pack',
+        'per_item',
+        'unit_item',
+        'price_sell_item',
     ];
 
     protected $casts = [

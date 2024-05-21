@@ -23,18 +23,31 @@ class ProductService
 
         $all_products = [];
         if ($request->get('search')) {
-            $selected_products = self::binarySearch($products, $request->get('search'));
+            $selected_products = self::sequential($products, $request->get('search'));
             // dd($selected_products);
 
-
-            if ($selected_products !== -1) {
-                $all_products[] = $products[$selected_products];
+            if (count($selected_products)) {
+                $all_products = $selected_products;
             }
         } else {
             $all_products = $products;
         }
 
         return new ProductCollection($all_products);
+    }
+
+    public static function sequential($arr, $x)
+    {
+        $existingProduct  = [];
+        foreach ($arr as $item) {
+            $pos = strpos(strtolower($item->name), strtolower($x));
+
+            if ($pos !== false) {
+                $existingProduct[] = $item;
+            }
+        }
+
+        return $existingProduct;
     }
 
     private static function binarySearch($arr, $x)
@@ -77,7 +90,21 @@ class ProductService
 
     public static function create(Request $request): bool
     {
-        $payload = $request->only('category_id', 'code', 'name', 'unit', 'stock', 'price_buy', 'price_sell', 'description', 'date');
+        $payload = $request->only(
+            'category_id',
+            'code',
+            'name',
+            'unit',
+            'stock',
+            'price_buy',
+            'price_sell',
+            'description',
+            'date',
+            'per_pack',
+            'per_item',
+            'unit_item',
+            'price_sell_item'
+        );
 
         $responseUpload = RequestHelper::uploadImage($request->file('photo'), Product::getRelativePath());
         if (!$responseUpload['success']) {
@@ -91,7 +118,21 @@ class ProductService
 
     public static function update(Product $product, Request $request): bool
     {
-        $payload = $request->only('category_id', 'code', 'name', 'unit', 'stock', 'price_buy', 'price_sell', 'description', 'date');
+        $payload = $request->only(
+            'category_id',
+            'code',
+            'name',
+            'unit',
+            'stock',
+            'price_buy',
+            'price_sell',
+            'description',
+            'date',
+            'per_pack',
+            'per_item',
+            'unit_item',
+            'price_sell_item'
+        );
         if ($request->hasFile('photo')) {
             $responseUpload = RequestHelper::uploadImage($request->file('photo'), Product::getRelativePath());
             if (!$responseUpload['success']) {

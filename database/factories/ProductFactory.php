@@ -33,6 +33,10 @@ class ProductFactory extends Factory
             'date' => fake()->date(),
             'photo' => '',
             'category_id' => $category->id,
+            'per_pack' => fake()->numberBetween(1, 12),
+            'per_item' => 1,
+            'unit_item' => 'Biji',
+            'price_sell_item' => fake()->numberBetween(1000, 900000),
         ];
     }
 }
