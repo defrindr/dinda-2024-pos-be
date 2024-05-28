@@ -23,7 +23,7 @@ class TransactionDetailResource extends JsonResource
         $resource['total_price'] = CurrencyHelper::rupiah($resource['total_price']);
 
         // jika route detail, tampilkan keseluruhan resource
-        if ($request->routeIs('transaction.show')) {
+        // if ($request->routeIs('transaction.show')) {
             $product = Product::where('id', $resource['product_id'])->first();
             if ($product) {
                 $resource['product'] = new ProductResource($product);
@@ -32,7 +32,7 @@ class TransactionDetailResource extends JsonResource
             }
 
             unset($resource['transaction_id']);
-        }
+        // }
 
         return $resource;
     }

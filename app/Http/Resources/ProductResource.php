@@ -20,8 +20,9 @@ class ProductResource extends JsonResource
         $resource = parent::toArray($request);
 
         // currency formatter
-        $resource['_price_sell'] = CurrencyHelper::rupiah($resource['price_sell']);
-        $resource['_price_buy'] = CurrencyHelper::rupiah($resource['price_buy']);
+        $resource['_harga_pack'] = CurrencyHelper::rupiah($resource['harga_pack']);
+        $resource['_harga_ecer'] = CurrencyHelper::rupiah($resource['harga_ecer']);
+        $resource['_harga_beli'] = CurrencyHelper::rupiah($resource['harga_beli']);
 
         $resource['category'] = Category::where('id', $this->category_id)->first();
         $resource['photo'] = asset_storage(Product::getRelativePath().$this->photo);

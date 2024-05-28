@@ -59,7 +59,7 @@ $setting = \App\Models\ProfilAplikasi::first();
                 <td style="width: 50%;text-align:end"></td>
             </tr>
             <tr>
-                <td style="width: 50%;"><?= $item->amount ?> X <?= CurrencyHelper::rupiah($item->price) ?></td>
+                <td style="width: 50%;"><?= $item->quantity ?> X <?= CurrencyHelper::rupiah($item->price) ?></td>
                 <td style="width: 50%;text-align:right">{{ CurrencyHelper::rupiah($item->total_price) }}</td>
             </tr>
         @endforeach

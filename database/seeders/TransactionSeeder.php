@@ -47,6 +47,7 @@ class TransactionSeeder extends Seeder
                 $detail = new TransactionDetail();
 
                 $detail->product_id = $product->id;
+                $detail->satuan = $product->satuan_pack;
                 $detail->transaction_id = $transaction->id;
                 $detail->price = $product->price_sell;
                 $detail->quantity = $quantity;

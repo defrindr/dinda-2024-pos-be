@@ -11,20 +11,20 @@ class Product extends BaseModel
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'category_id',
-        'code',
-        'name',
-        'unit',
-        'stock',
-        'price_buy',
-        'price_sell',
-        'description',
-        'date',
-        'photo',
-        'per_pack',
-        'per_item',
-        'unit_item',
-        'price_sell_item',
+        "category_id",
+        "code",
+        "name",
+        "stock_pack",
+        "satuan_pack",
+        "per_pack",
+        "harga_pack",
+        "harga_ecer",
+        "jumlah_ecer",
+        "satuan_ecer",
+        "harga_beli",
+        "description",
+        "date",
+        "photo",
     ];
 
     protected $casts = [
@@ -37,7 +37,9 @@ class Product extends BaseModel
         $query->where(function ($query) use ($search) {
             $query->where('code', 'like', "%$search%")
                 ->orWhere('name', 'like', "%$search%")
-                ->orWhere('unit', 'like', "%$search%");
+                ->orWhere('description', 'like', "%$search%")
+                ->orWhere('satuan_pack', 'like', "%$search%")
+                ->orWhere('satuan_ecer', 'like', "%$search%");
         });
     }
 

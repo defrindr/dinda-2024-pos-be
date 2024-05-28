@@ -12,6 +12,7 @@ class CategorySeeder extends Seeder
      */
     public function run(): void
     {
-        Category::create(['id' => 1, 'name' => 'Sembako']);
+        Category::create(['id' => 1, 'name' => 'KEBUTUHAN POKOK']);
+        Category::create(['id' => 2, 'name' => 'BARANG']);
     }
 }

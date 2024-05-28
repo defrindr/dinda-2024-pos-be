@@ -45,7 +45,7 @@ class TransactionService
         DB::beginTransaction();
         // template transaksi
         $transaction = self::generateTemplateTransaction($cashier);
-        if (! $transaction) {
+        if (!$transaction) {
             throw new BadRequestHttpException('Gagal membuat template transaksi');
         }
 
@@ -56,17 +56,19 @@ class TransactionService
 
             // aliasing variable
             $productId = $item['product_id'];
+            $satuan = $item['satuan'];
             $amount = $item['amount'];
 
             // validasi product
-            $product = self::productAvailable($productId, $amount);
+            $product = self::productAvailable($productId, $satuan, $amount);
 
             // create detail transaction
             $totalPurchase = self::calculateAndCreateDetailItem(
                 $transaction,
                 $product,
                 $totalPurchase,
-                $amount
+                $amount,
+                $satuan
             );
         }
 
@@ -74,7 +76,7 @@ class TransactionService
         $memberId = self::haveJoinMember($memberId);
 
         $successUpdate = self::calculateTransactionPayment($transaction, $memberId, $totalPurchase, $paymentAmount);
-        if (! $successUpdate) {
+        if (!$successUpdate) {
             throw new BadRequestHttpException('Gagal membuat transaksi');
         }
 
@@ -89,7 +91,7 @@ class TransactionService
     public static function downloadInvoice(string $invoiceCode): mixed
     {
         $transaction = Transaction::where('invoice', $invoiceCode)->first();
-        if (! $transaction) {
+        if (!$transaction) {
             return false;
         }
 
@@ -176,7 +178,7 @@ class TransactionService
         if ($memberId) {
             // check member exist
             $member = Pelanggan::where('id', $memberId)->first();
-            if (! $member) {
+            if (!$member) {
                 throw new BadRequestHttpException('Member tidak terdaftar pada sistem kami');
             }
 
@@ -192,28 +194,30 @@ class TransactionService
      *
      * @return int Total Purchase
      */
-    protected static function calculateAndCreateDetailItem(Transaction $transaction, Product $product, int $totalPurchase, int $amount): int
+    protected static function calculateAndCreateDetailItem(Transaction $transaction, Product $product, int $totalPurchase, int $amount, int $satuan): int
     {
         // calculate price per item
-        $pricePerItem = $product->price_sell * $amount;
+        $pricePerItem = ($satuan == 1 ? $product->harga_pack : $product->harga_ecer) * $amount;
+        $jumlahBeli =  $satuan == 1 ? $product->per_pack * $amount : $amount;
 
         // create detail based on transaction
         $transactionDetail = TransactionDetail::create([
             'product_id' => $product->id,
+            'satuan' => $satuan == 1 ? $product->satuan_pack : $product->satuan_ecer,
             'transaction_id' => $transaction->id,
-            'price' => $product->price_sell,
+            'price' => $satuan == 1 ? $product->harga_pack : $product->harga_ecer,
             'quantity' => $amount,
             'total_price' => $pricePerItem,
         ]);
 
         // check detail transaction
-        if (! $transactionDetail) {
+        if (!$transactionDetail) {
             throw new BadRequestHttpException('Gagal menambahkan detail transaksi');
         }
 
         // update stok
-        $success = $product->update(['stock' => $product->stock - $amount]);
-        if (! $success) {
+        $success = $product->update(['stock' => $product->stock_pack - $jumlahBeli]);
+        if (!$success) {
             throw new BadRequestHttpException('Gagal mengubah sisa stok');
         }
 
@@ -223,13 +227,17 @@ class TransactionService
     /**
      * Cek apakah produk ada & stok cukup
      */
-    protected static function productAvailable(int $productId, int $stock): Product
+    protected static function productAvailable(int $productId, int $satuan, int $amount): Product
     {
         $product = Product::where('id', $productId)->first();
 
-        if (! $product) {
+        if (!$product) {
             throw new BadRequestHttpException("Produk #{$productId} tidak ditemukan");
-        } elseif ($product->stock < $stock) {
+        }
+
+        $jumlahBeli = $satuan == 1 ? $product->per_pack * $amount : $amount;
+
+        if ($product->stock_pack < $jumlahBeli) {
             // stok kurang
             throw new BadRequestHttpException("Jumlah stok dari {$product->name} tidak mencukupi.");
         }
@@ -247,7 +255,7 @@ class TransactionService
         return Transaction::create([
             'kasir_id' => $user->id,
             'customer_id' => null,
-            'invoice' => 'TRX'.date('YmdHis'),
+            'invoice' => 'TRX' . date('YmdHis'),
             'date' => date('Y-m-d'),
             'total_price' => 0,
             'total_pay' => 0,

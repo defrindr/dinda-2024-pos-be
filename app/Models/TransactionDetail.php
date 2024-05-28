@@ -11,6 +11,7 @@ class TransactionDetail extends BaseModel
 
     protected $fillable = [
         'product_id',
+        'satuan',
         'transaction_id',
         'price',
         'quantity',

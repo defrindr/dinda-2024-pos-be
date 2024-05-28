@@ -8,6 +8,7 @@ class TrasanctionRequest extends BaseFormRequest
     {
         return [
             'items.*.product_id' => 'required|numeric',
+            'items.*.satuan' => 'required',
             'items.*.amount' => 'required|numeric',
 
             'customer_id' => 'required',
