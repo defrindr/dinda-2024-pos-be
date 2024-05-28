@@ -33,14 +33,14 @@ class PelangganService
 
     public static function create(Request $request): bool
     {
-        $payload = $request->only('code', 'name', 'phone', 'address', 'gender', 'dob', 'status');
+        $payload = $request->only('nik', 'code', 'name', 'phone', 'address', 'gender', 'dob', 'status');
 
         return Pelanggan::create($payload) ? true : false;
     }
 
     public static function update(Pelanggan $pelanggan, Request $request): bool
     {
-        $payload = $request->only('code', 'name', 'phone', 'address', 'gender', 'dob', 'status');
+        $payload = $request->only('nik', 'code', 'name', 'phone', 'address', 'gender', 'dob', 'status');
 
         return $pelanggan->update($payload);
     }

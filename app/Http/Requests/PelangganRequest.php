@@ -8,6 +8,7 @@ class PelangganRequest extends BaseFormRequest
     {
         return [
             'code' => 'required|string',
+            'nik' => 'required|string',
             'name' => 'required|min:3',
             'phone' => 'required|string',
             'address' => 'required|string',
