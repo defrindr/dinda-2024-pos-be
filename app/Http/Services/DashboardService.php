@@ -131,7 +131,7 @@ class DashboardService
             return "select 
             'fa-dollar-sign' as icon,
             'Laba Untung' as title,
-            sum(
+            coalesce(sum(
               (
                 (
                   case
@@ -140,9 +140,15 @@ class DashboardService
                   END
                 ) * transaction_details.quantity
               ) - (
-                products.harga_beli * per_pack * transaction_details.quantity
+                (
+                    case
+                      WHEN transaction_details.satuan = products.satuan_pack THEN products.harga_beli * per_pack
+                      WHEN transaction_details.satuan = products.satuan_ecer THEN products.harga_beli
+                    END
+                  )
+                 * transaction_details.quantity
               )
-            ) as total
+                ), 0) as total
           from transaction_details
             inner join products on products.id = transaction_details.product_id";
         }
