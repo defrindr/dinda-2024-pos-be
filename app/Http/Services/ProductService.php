@@ -40,9 +40,10 @@ class ProductService
     {
         $existingProduct  = [];
         foreach ($arr as $item) {
-            $pos = strpos(strtolower($item->name), strtolower($x));
+            $pos1 = strpos(strtolower($item->name), strtolower($x));
+            $pos2 = strpos(strtolower($item->code), strtolower($x));
 
-            if ($pos !== false) {
+            if ($pos1 !== false || $pos2 !== false) {
                 $existingProduct[] = $item;
             }
         }

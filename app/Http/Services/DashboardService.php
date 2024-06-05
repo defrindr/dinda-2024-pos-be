@@ -32,6 +32,10 @@ class DashboardService
             'icon' => 'fa-wallet',
             'title' => 'Transaction',
         ],
+        'laba' => [
+            'icon' => 'fa-wallet',
+            'title' => 'laba Keuntungan',
+        ],
     ];
 
     /**
@@ -76,7 +80,7 @@ class DashboardService
         }, ARRAY_FILTER_USE_KEY);
 
         // add custom condition
-        $items['transactions']['condition'] = 'kasir_id = '.$user->id;
+        $items['transactions']['condition'] = 'kasir_id = ' . $user->id;
 
         $query = self::bindItemsToQuery($items);
 
@@ -121,7 +125,27 @@ class DashboardService
     {
         $title = $item['title'];
         $icon = $item['icon'];
-        $condition = isset($item['condition']) ? 'where '.$item['condition'] : '';
+        $condition = isset($item['condition']) ? 'where ' . $item['condition'] : '';
+
+        if ($tableName === "laba") {
+            return "select 
+            'fa-dollar-sign' as icon,
+            'Laba Untung' as title,
+            sum(
+              (
+                (
+                  case
+                    WHEN transaction_details.satuan = products.satuan_pack THEN products.harga_pack
+                    WHEN transaction_details.satuan = products.satuan_ecer THEN products.harga_ecer
+                  END
+                ) * transaction_details.quantity
+              ) - (
+                products.harga_beli * per_pack * transaction_details.quantity
+              )
+            ) as total
+          from transaction_details
+            inner join products on products.id = transaction_details.product_id";
+        }
 
         return "select '{$icon}' as icon, '{$title}' as title, count($tableName.id) as total from $tableName $condition";
     }
