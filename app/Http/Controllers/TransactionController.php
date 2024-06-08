@@ -16,7 +16,7 @@ class TransactionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['downloadInvoice']]);
+        $this->middleware('auth:api', ['except' => ['downloadInvoice', 'report']]);
     }
 
     /**
@@ -69,7 +69,7 @@ class TransactionController extends Controller
     public function downloadInvoice(string $invoiceCode): Response|JsonResponse
     {
         $view = TransactionService::downloadInvoice($invoiceCode);
-        if (! $view) {
+        if (!$view) {
             return ResponseHelper::badRequest('Transaksi tidak ditemukan');
         }
 
@@ -91,5 +91,23 @@ class TransactionController extends Controller
 
             return response()->json(['message' => 'Terjadi kesalahan saat menjalankan aksi'], 400);
         }
+    }
+
+    public function report(Request $request)
+    {
+        $tanggalAwal = $request->get('tanggal_awal');
+        $tanggalAkhir = $request->get('tanggal_akhir');
+
+        if (!$tanggalAwal || !$tanggalAkhir) {
+            return response()->json(['message' => 'Parameter harus diisi semua'], 400);
+        } else if (
+            strtotime($tanggalAwal) > strtotime($tanggalAkhir)
+        ) {
+            return response()->json(['message' => 'Jangka waktu tidak valid'], 400);
+        }
+
+        return ResponseHelper::successWithData(
+            TransactionService::report($tanggalAwal, $tanggalAkhir)
+        );
     }
 }

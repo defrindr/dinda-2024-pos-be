@@ -18,6 +18,7 @@ class Transaction extends BaseModel
         'total_price',
         'total_pay',
         'total_return',
+        'created_at'
     ];
 
     protected $casts = [

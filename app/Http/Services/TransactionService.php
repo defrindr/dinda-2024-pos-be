@@ -4,6 +4,8 @@ namespace App\Http\Services;
 
 use App\Exceptions\ForbiddenHttpException;
 use App\Http\Resources\TransactionCollection;
+use App\Http\Resources\TransactionDetailResource;
+use App\Http\Resources\TransactionResource;
 use App\Models\Pelanggan;
 use App\Models\Product;
 use App\Models\Transaction;
@@ -16,14 +18,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class TransactionService
+class Transactionservice
 {
     /**
      * Mendapatkan list transaksi
      */
     public static function paginate(Request $request): JsonResource
     {
-        $pagination = Transaction::orderBy('id', 'desc')
+        $pagination = Transaction::orderBy('date', 'desc')
             ->search($request->get('search'))
             ->paginate(10);
 
@@ -261,5 +263,75 @@ class TransactionService
             'total_pay' => 0,
             'total_return' => 0,
         ]);
+    }
+
+
+    public static function report(string $tanggalAwal = null, string $tanggalAkhir = null)
+    {
+        $rawTransaction = TransactionDetail::whereIn(
+            'transaction_details.transaction_id',
+            Transaction::whereBetween('date', [$tanggalAwal, $tanggalAkhir])->select('id')
+        )
+            ->select(
+                'product_id',
+                DB::raw(
+                    'sum((
+                  case
+                    WHEN transaction_details.satuan = products.satuan_pack THEN products.per_pack
+                    WHEN transaction_details.satuan = products.satuan_ecer THEN 1
+                  END
+                ) * transaction_details.quantity) as jumlahTerjual'
+                )
+            )
+            ->join('products', 'products.id', 'transaction_details.product_id')->groupBy('product_id')->get();
+
+
+        $transactions = [];
+        foreach ($rawTransaction as $t) {
+            $product = Product::where('id', $t->product_id)->first();
+            $transactions[] = [
+                "product" => $product,
+                "jumlahTerjual" => $t->jumlahTerjual . " " . $product->satuan_ecer
+            ];
+        }
+
+        $laba = json_decode(self::queryGetLaba($tanggalAwal, $tanggalAkhir));
+
+        return compact('transactions', 'laba');
+    }
+
+
+    public static function queryGetLaba(string $tanggalAwal = null, string $tanggalAkhir = null): string
+    {
+        $query = TransactionDetail::join('products', 'products.id', 'transaction_details.product_id')
+            ->join('transactions', 'transactions.id', 'transaction_details.transaction_id')
+            ->select(
+                DB::raw("'fa-dollar-sign' as icon"),
+                DB::raw("'Laba Untung' as title"),
+                DB::raw("coalesce(sum(
+              (
+                (
+                  case
+                    WHEN transaction_details.satuan = products.satuan_pack THEN products.harga_pack
+                    WHEN transaction_details.satuan = products.satuan_ecer THEN products.harga_ecer
+                  END
+                ) * transaction_details.quantity
+              ) - (
+                (
+                    case
+                      WHEN transaction_details.satuan = products.satuan_pack THEN products.harga_beli * per_pack
+                      WHEN transaction_details.satuan = products.satuan_ecer THEN products.harga_beli
+                    END
+                  )
+                 * transaction_details.quantity
+              )
+                ), 0) as total")
+            );
+
+        if ($tanggalAwal && $tanggalAkhir) {
+            $query->whereBetween('transactions.date', [$tanggalAwal, $tanggalAkhir]);
+        }
+
+        return $query->first();
     }
 }
