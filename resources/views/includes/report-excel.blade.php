@@ -23,7 +23,7 @@
     <tbody>
         @foreach ($transactions as $detail)
             <tr>
-                <td>{{ \App\Helpers\DateHelper::readableDate($detail->created_at) }}</td>
+                <td>{{ \App\Helpers\DateHelper::readableDate($detail->transaction->date) }}</td>
                 <td>{{ $detail->product->name }}</td>
                 <td>{{ $detail->quantity }}</td>
                 <td>{{ \App\Helpers\Currencyhelper::rupiah($detail->price) }}</td>

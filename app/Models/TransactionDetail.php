@@ -30,4 +30,8 @@ class TransactionDetail extends BaseModel
     {
         return $this->belongsTo(Product::class);
     }
+    public function transaction()
+    {
+        return $this->belongsTo(Transaction::class);
+    }
 }

@@ -16,7 +16,7 @@ class TransactionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['downloadInvoice', 'report', 'reportExcel']]);
+        $this->middleware('auth:api', ['except' => ['downloadInvoice', 'reportExcel']]);
     }
 
     /**
@@ -24,8 +24,9 @@ class TransactionController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        $user = auth()->user();
         return ResponseHelper::successWithData(
-            TransactionService::paginate($request),
+            TransactionService::paginate($user, $request),
             'Transaksi berhasil ditemukan'
         );
     }
@@ -95,6 +96,7 @@ class TransactionController extends Controller
 
     public function report(Request $request)
     {
+        $user = auth()->user();
         $tanggalAwal = $request->get('tanggal_awal');
         $tanggalAkhir = $request->get('tanggal_akhir');
 
@@ -107,7 +109,7 @@ class TransactionController extends Controller
         }
 
         return ResponseHelper::successWithData(
-            TransactionService::report($tanggalAwal, $tanggalAkhir)
+            TransactionService::report($user, $tanggalAwal, $tanggalAkhir)
         );
     }
 
