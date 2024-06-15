@@ -11,20 +11,20 @@ class Product extends BaseModel
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        "category_id",
-        "code",
-        "name",
-        "stock_pack",
-        "satuan_pack",
-        "per_pack",
-        "harga_pack",
-        "harga_ecer",
-        "jumlah_ecer",
-        "satuan_ecer",
-        "harga_beli",
-        "description",
-        "date",
-        "photo",
+        'category_id',
+        'code',
+        'name',
+        'stock_pack',
+        'satuan_pack',
+        'per_pack',
+        'harga_pack',
+        'harga_ecer',
+        'jumlah_ecer',
+        'satuan_ecer',
+        'harga_beli',
+        'description',
+        'date',
+        'photo',
     ];
 
     protected $casts = [

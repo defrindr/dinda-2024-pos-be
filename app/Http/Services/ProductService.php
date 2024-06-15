@@ -2,7 +2,6 @@
 
 namespace App\Http\Services;
 
-use App\Helpers\PaginationHelper;
 use App\Helpers\RequestHelper;
 use App\Http\Resources\ProductCollection;
 use App\Models\Product;
@@ -38,7 +37,7 @@ class ProductService
 
     public static function sequential($arr, $x)
     {
-        $existingProduct  = [];
+        $existingProduct = [];
         foreach ($arr as $item) {
             $pos1 = strpos(strtolower($item->name), strtolower($x));
             $pos2 = strpos(strtolower($item->code), strtolower($x));
@@ -55,11 +54,11 @@ class ProductService
     {
         $l = 0;
         $r = count($arr);
-        // Loop to implement Binary Search 
+        // Loop to implement Binary Search
         while ($l <= $r) {
 
-            // Calculatiing mid 
-            $m = $l + (int)(($r - $l) / 2);
+            // Calculatiing mid
+            $m = $l + (int) (($r - $l) / 2);
             if ($m == count($arr)) {
                 return -1;
             }
@@ -69,25 +68,27 @@ class ProductService
             // print($l . " " . $r . "<br/><br/>");
             $maxLength = strlen($arr[$m]->name) > strlen($x) ? strlen($x) : strlen($arr[$m]->name);
 
-            $res = strncmp(strtolower($x), strtolower($arr[$m]->name),  $maxLength);
+            $res = strncmp(strtolower($x), strtolower($arr[$m]->name), $maxLength);
             // print("{$arr[$m]->name}\n{$x}\n$res");
 
-            // Check if x is present at mid 
-            if ($res == 0)
+            // Check if x is present at mid
+            if ($res == 0) {
                 return $m;
+            }
 
-            // If x greater, ignore left half 
-            if ($res > 0)
+            // If x greater, ignore left half
+            if ($res > 0) {
                 $l = $m + 1;
+            }
 
-            // If x is smaller, ignore right half 
-            else
+            // If x is smaller, ignore right half
+            else {
                 $r = $m - 1;
+            }
         }
 
         return -1;
     }
-
 
     public static function create(Request $request): bool
     {
@@ -108,7 +109,7 @@ class ProductService
         );
 
         $responseUpload = RequestHelper::uploadImage($request->file('photo'), Product::getRelativePath());
-        if (!$responseUpload['success']) {
+        if (! $responseUpload['success']) {
             throw new BadRequestHttpException('Gagal mengunggah gambar');
         }
 
@@ -136,7 +137,7 @@ class ProductService
         );
         if ($request->hasFile('photo')) {
             $responseUpload = RequestHelper::uploadImage($request->file('photo'), Product::getRelativePath());
-            if (!$responseUpload['success']) {
+            if (! $responseUpload['success']) {
                 throw new BadRequestHttpException('Gagal mengunggah gambar');
             }
 

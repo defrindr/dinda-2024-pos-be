@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Category;
-use App\Models\Product;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -12,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class ProductFactory extends Factory
 {
     private static $order = 0;
+
     /**
      * Define the model's default state.
      *
@@ -22,8 +22,9 @@ class ProductFactory extends Factory
         $category = Category::inRandomOrder()->first();
 
         self::$order += 1;
+
         return [
-            'code' => "PRD" . sprintf('%03d', self::$order),
+            'code' => 'PRD'.sprintf('%03d', self::$order),
             'name' => fake()->name(),
             'unit' => fake()->word(),
             'stock' => fake()->numberBetween(1, 200),

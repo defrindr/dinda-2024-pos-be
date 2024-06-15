@@ -80,7 +80,7 @@ class DashboardService
         }, ARRAY_FILTER_USE_KEY);
 
         // add custom condition
-        $items['transactions']['condition'] = 'kasir_id = ' . $user->id;
+        $items['transactions']['condition'] = 'kasir_id = '.$user->id;
 
         $query = self::bindItemsToQuery($items);
 
@@ -125,9 +125,9 @@ class DashboardService
     {
         $title = $item['title'];
         $icon = $item['icon'];
-        $condition = isset($item['condition']) ? 'where ' . $item['condition'] : '';
+        $condition = isset($item['condition']) ? 'where '.$item['condition'] : '';
 
-        if ($tableName === "laba") {
+        if ($tableName === 'laba') {
             return "select 
             'fa-dollar-sign' as icon,
             'Laba Untung' as title,

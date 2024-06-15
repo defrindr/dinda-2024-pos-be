@@ -24,14 +24,14 @@ class TransactionDetailResource extends JsonResource
 
         // jika route detail, tampilkan keseluruhan resource
         // if ($request->routeIs('transaction.show')) {
-            $product = Product::where('id', $resource['product_id'])->first();
-            if ($product) {
-                $resource['product'] = new ProductResource($product);
-            } else {
-                $resource['product'] = null;
-            }
+        $product = Product::where('id', $resource['product_id'])->first();
+        if ($product) {
+            $resource['product'] = new ProductResource($product);
+        } else {
+            $resource['product'] = null;
+        }
 
-            unset($resource['transaction_id']);
+        unset($resource['transaction_id']);
         // }
 
         return $resource;

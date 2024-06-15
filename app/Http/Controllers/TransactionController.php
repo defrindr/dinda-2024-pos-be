@@ -16,7 +16,7 @@ class TransactionController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['downloadInvoice', 'report']]);
+        $this->middleware('auth:api', ['except' => ['downloadInvoice', 'report', 'reportExcel']]);
     }
 
     /**
@@ -51,7 +51,7 @@ class TransactionController extends Controller
             $success = TransactionService::create($request, $cashier);
 
             if ($success) {
-                return ResponseHelper::successWithData(null, 'Transaksi berhasil dibuat');
+                return ResponseHelper::successWithData($success, 'Transaksi berhasil dibuat');
             } else {
                 return ResponseHelper::badRequest('Transaksi gagal dibuat');
             }
@@ -69,7 +69,7 @@ class TransactionController extends Controller
     public function downloadInvoice(string $invoiceCode): Response|JsonResponse
     {
         $view = TransactionService::downloadInvoice($invoiceCode);
-        if (!$view) {
+        if (! $view) {
             return ResponseHelper::badRequest('Transaksi tidak ditemukan');
         }
 
@@ -98,9 +98,9 @@ class TransactionController extends Controller
         $tanggalAwal = $request->get('tanggal_awal');
         $tanggalAkhir = $request->get('tanggal_akhir');
 
-        if (!$tanggalAwal || !$tanggalAkhir) {
+        if (! $tanggalAwal || ! $tanggalAkhir) {
             return response()->json(['message' => 'Parameter harus diisi semua'], 400);
-        } else if (
+        } elseif (
             strtotime($tanggalAwal) > strtotime($tanggalAkhir)
         ) {
             return response()->json(['message' => 'Jangka waktu tidak valid'], 400);
@@ -109,5 +109,31 @@ class TransactionController extends Controller
         return ResponseHelper::successWithData(
             TransactionService::report($tanggalAwal, $tanggalAkhir)
         );
+    }
+
+    public function reportExcel(Request $request)
+    {
+        if (! $request->get('token')) {
+            return response()->json(['message' => 'Tidak valid'], 400);
+        }
+        $token = $request->get('token');
+        $tokenJson = json_decode(base64_decode($token));
+        $tanggalAwal = $tokenJson->tanggal_awal;
+        $tanggalAkhir = $tokenJson->tanggal_akhir;
+
+        $jwt = $tokenJson->token;
+        $user = auth()->setToken($jwt)->user();
+
+        if (! $tanggalAwal || ! $tanggalAkhir) {
+            return response()->json(['message' => 'Parameter harus diisi semua'], 400);
+        } elseif (
+            strtotime($tanggalAwal) > strtotime($tanggalAkhir)
+        ) {
+            return response()->json(['message' => 'Jangka waktu tidak valid'], 400);
+        } elseif (! $user) {
+            return response()->json(['message' => 'User tidak valid'], 400);
+        }
+
+        return TransactionService::reportExcel($user, $tanggalAwal, $tanggalAkhir);
     }
 }

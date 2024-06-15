@@ -3,9 +3,9 @@
 namespace App\Http\Services;
 
 use App\Exceptions\ForbiddenHttpException;
+use App\Exports\LabaExport;
+use App\Helpers\CurrencyHelper;
 use App\Http\Resources\TransactionCollection;
-use App\Http\Resources\TransactionDetailResource;
-use App\Http\Resources\TransactionResource;
 use App\Models\Pelanggan;
 use App\Models\Product;
 use App\Models\Transaction;
@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class Transactionservice
@@ -37,7 +38,7 @@ class Transactionservice
      *
      * @return bool status pembuatan transaksi
      */
-    public static function create(Request $request, User $cashier): bool
+    public static function create(Request $request, User $cashier): Transaction
     {
         // aliasing items
         $items = $request->get('items');
@@ -47,7 +48,7 @@ class Transactionservice
         DB::beginTransaction();
         // template transaksi
         $transaction = self::generateTemplateTransaction($cashier);
-        if (!$transaction) {
+        if (! $transaction) {
             throw new BadRequestHttpException('Gagal membuat template transaksi');
         }
 
@@ -78,13 +79,13 @@ class Transactionservice
         $memberId = self::haveJoinMember($memberId);
 
         $successUpdate = self::calculateTransactionPayment($transaction, $memberId, $totalPurchase, $paymentAmount);
-        if (!$successUpdate) {
+        if (! $successUpdate) {
             throw new BadRequestHttpException('Gagal membuat transaksi');
         }
 
         DB::commit();
 
-        return true;
+        return $transaction;
     }
 
     /**
@@ -93,7 +94,7 @@ class Transactionservice
     public static function downloadInvoice(string $invoiceCode): mixed
     {
         $transaction = Transaction::where('invoice', $invoiceCode)->first();
-        if (!$transaction) {
+        if (! $transaction) {
             return false;
         }
 
@@ -180,7 +181,7 @@ class Transactionservice
         if ($memberId) {
             // check member exist
             $member = Pelanggan::where('id', $memberId)->first();
-            if (!$member) {
+            if (! $member) {
                 throw new BadRequestHttpException('Member tidak terdaftar pada sistem kami');
             }
 
@@ -200,7 +201,7 @@ class Transactionservice
     {
         // calculate price per item
         $pricePerItem = ($satuan == 1 ? $product->harga_pack : $product->harga_ecer) * $amount;
-        $jumlahBeli =  $satuan == 1 ? $product->per_pack * $amount : $amount;
+        $jumlahBeli = $satuan == 1 ? $product->per_pack * $amount : $amount;
 
         // create detail based on transaction
         $transactionDetail = TransactionDetail::create([
@@ -213,13 +214,13 @@ class Transactionservice
         ]);
 
         // check detail transaction
-        if (!$transactionDetail) {
+        if (! $transactionDetail) {
             throw new BadRequestHttpException('Gagal menambahkan detail transaksi');
         }
 
         // update stok
         $success = $product->update(['stock' => $product->stock_pack - $jumlahBeli]);
-        if (!$success) {
+        if (! $success) {
             throw new BadRequestHttpException('Gagal mengubah sisa stok');
         }
 
@@ -233,7 +234,7 @@ class Transactionservice
     {
         $product = Product::where('id', $productId)->first();
 
-        if (!$product) {
+        if (! $product) {
             throw new BadRequestHttpException("Produk #{$productId} tidak ditemukan");
         }
 
@@ -257,7 +258,7 @@ class Transactionservice
         return Transaction::create([
             'kasir_id' => $user->id,
             'customer_id' => null,
-            'invoice' => 'TRX' . date('YmdHis'),
+            'invoice' => 'TRX'.date('YmdHis'),
             'date' => date('Y-m-d'),
             'total_price' => 0,
             'total_pay' => 0,
@@ -265,34 +266,38 @@ class Transactionservice
         ]);
     }
 
-
-    public static function report(string $tanggalAwal = null, string $tanggalAkhir = null)
+    public static function reportExcel(User $user, ?string $tanggalAwal = null, ?string $tanggalAkhir = null)
     {
-        $rawTransaction = TransactionDetail::whereIn(
-            'transaction_details.transaction_id',
-            Transaction::whereBetween('date', [$tanggalAwal, $tanggalAkhir])->select('id')
-        )
-            ->select(
-                'product_id',
-                DB::raw(
-                    'sum((
-                  case
-                    WHEN transaction_details.satuan = products.satuan_pack THEN products.per_pack
-                    WHEN transaction_details.satuan = products.satuan_ecer THEN 1
-                  END
-                ) * transaction_details.quantity) as jumlahTerjual'
-                )
-            )
-            ->join('products', 'products.id', 'transaction_details.product_id')->groupBy('product_id')->get();
+        $query = Transaction::whereBetween('date', [$tanggalAwal, $tanggalAkhir]);
 
+        if ($user->role == User::LEVEL_KASIR) {
+            $query->where('kasir_id', '=', $user->id);
+        }
 
-        $transactions = [];
-        foreach ($rawTransaction as $t) {
+        $transactions = TransactionDetail::whereIn(
+            'id',
+            $query->select('id')
+        )->get();
+
+        $laba = json_decode(self::queryGetLaba($tanggalAwal, $tanggalAkhir));
+
+        $tanggal = $tanggalAwal.' sd '.$tanggalAkhir;
+
+        return Excel::download(new LabaExport($tanggal, $laba, $transactions), $tanggal.'.xlsx');
+    }
+
+    public static function report(?string $tanggalAwal = null, ?string $tanggalAkhir = null)
+    {
+        $transactions = TransactionDetail::whereIn('id', Transaction::whereBetween('date', [$tanggalAwal, $tanggalAkhir])->select('id'))->get();
+
+        foreach ($transactions as $key => $t) {
             $product = Product::where('id', $t->product_id)->first();
-            $transactions[] = [
-                "product" => $product,
-                "jumlahTerjual" => $t->jumlahTerjual . " " . $product->satuan_ecer
-            ];
+            $transactions[$key]['tanggal'] = date('d F Y, H:i', strtotime($t->created_at));
+            $transactions[$key]['price'] = CurrencyHelper::rupiah($t->price);
+            $transactions[$key]['total_price'] = CurrencyHelper::rupiah($t->total_price);
+            $transactions[$key]['tanggal'] = date('d F Y, H:i', strtotime($t->created_at));
+            $transactions[$key]['product'] = $product;
+            $transactions[$key]['jumlahTerjual'] = $t->jumlahTerjual.' '.$product->satuan_ecer;
         }
 
         $laba = json_decode(self::queryGetLaba($tanggalAwal, $tanggalAkhir));
@@ -300,15 +305,14 @@ class Transactionservice
         return compact('transactions', 'laba');
     }
 
-
-    public static function queryGetLaba(string $tanggalAwal = null, string $tanggalAkhir = null): string
+    public static function queryGetLaba(?string $tanggalAwal = null, ?string $tanggalAkhir = null): string
     {
         $query = TransactionDetail::join('products', 'products.id', 'transaction_details.product_id')
             ->join('transactions', 'transactions.id', 'transaction_details.transaction_id')
             ->select(
                 DB::raw("'fa-dollar-sign' as icon"),
                 DB::raw("'Laba Untung' as title"),
-                DB::raw("coalesce(sum(
+                DB::raw('coalesce(sum(
               (
                 (
                   case
@@ -325,7 +329,7 @@ class Transactionservice
                   )
                  * transaction_details.quantity
               )
-                ), 0) as total")
+                ), 0) as total')
             );
 
         if ($tanggalAwal && $tanggalAkhir) {

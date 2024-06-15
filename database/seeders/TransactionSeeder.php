@@ -32,7 +32,7 @@ class TransactionSeeder extends Seeder
 
             $transaction->kasir_id = User::inRandomOrder()->first()->id;
             $transaction->customer_id = Pelanggan::inRandomOrder()->first()->id;
-            $transaction->invoice = date('YmdHis' . random_int(0, 99999));
+            $transaction->invoice = date('YmdHis'.random_int(0, 99999));
             $transaction->date = date('Y-m-d');
             $transaction->total_price = 0;
             $transaction->total_pay = 0;
@@ -61,7 +61,7 @@ class TransactionSeeder extends Seeder
             $transaction->total_return = $margin;
             $transaction->total_pay = $transaction->total_price + $margin;
             $val = 10 - $i;
-            $transaction->date =  date("Y-m-d", strtotime(date("Y-m-d") . " {$val} days"));
+            $transaction->date = date('Y-m-d', strtotime(date('Y-m-d')." {$val} days"));
 
             $transaction->save();
         }

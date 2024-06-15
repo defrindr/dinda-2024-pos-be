@@ -20,16 +20,16 @@ class PelangganFactory extends Factory
         $gender = ['L', 'P'];
         $statuses = ['active', 'nonactive'];
 
-        $nik = "";
+        $nik = '';
 
         for ($char = 0; $char < 16; $char++) {
             $nik .= random_int(0, 9);
         }
 
         return [
-            'code' => 'PLG0000' . $number,
+            'code' => 'PLG0000'.$number,
             'nik' => $nik,
-            'name' => 'Pelanggan ' . $number,
+            'name' => 'Pelanggan '.$number,
             'phone' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'gender' => $gender[rand(0, 1)],
