@@ -4,10 +4,12 @@
             <td>Tanggal :</td>
             <td>{{ $tanggal }}</td>
         </tr>
-        <tr>
-            <td>Laba :</td>
-            <td>{{ \App\Helpers\Currencyhelper::rupiah($laba->total) }}</td>
-        </tr>
+        @if (auth()->user()->role != \App\Models\User::LEVEL_KASIR)
+            <tr>
+                <td>Laba :</td>
+                <td>{{ \App\Helpers\Currencyhelper::rupiah($laba->total) }}</td>
+            </tr>
+        @endif
     </tbody>
 </table>
 <table>
