@@ -125,7 +125,7 @@ class DashboardService
     {
         $title = $item['title'];
         $icon = $item['icon'];
-        $condition = isset($item['condition']) ? 'where '.$item['condition'] : '';
+        $condition = isset($item['condition']) ? 'and '.$item['condition'] : '';
 
         if ($tableName === 'laba') {
             return "select 
@@ -153,6 +153,6 @@ class DashboardService
             inner join products on products.id = transaction_details.product_id";
         }
 
-        return "select '{$icon}' as icon, '{$title}' as title, count($tableName.id) as total from $tableName $condition";
+        return "select '{$icon}' as icon, '{$title}' as title, count($tableName.id) as total from $tableName where deleted_at is null $condition";
     }
 }

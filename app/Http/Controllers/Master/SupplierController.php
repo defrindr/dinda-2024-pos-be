@@ -81,7 +81,7 @@ class SupplierController extends Controller
         try {
             $supplier->delete();
 
-            return ResponseHelper::success('Supplier berhasil dihapus');
+            return ResponseHelper::successWithData(null, 'Supplier berhasil dihapus');
         } catch (\Throwable $th) {
             // simpan log untuk tracing error
             Log::error($th->getMessage());
