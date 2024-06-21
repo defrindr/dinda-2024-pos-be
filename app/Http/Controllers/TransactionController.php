@@ -25,6 +25,7 @@ class TransactionController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = auth()->user();
+
         return ResponseHelper::successWithData(
             TransactionService::paginate($user, $request),
             'Transaksi berhasil ditemukan'

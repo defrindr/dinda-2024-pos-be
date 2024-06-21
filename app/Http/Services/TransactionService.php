@@ -53,7 +53,7 @@ class Transactionservice
         DB::beginTransaction();
         // template transaksi
         $transaction = self::generateTemplateTransaction($cashier);
-        if (!$transaction) {
+        if (! $transaction) {
             throw new BadRequestHttpException('Gagal membuat template transaksi');
         }
 
@@ -84,7 +84,7 @@ class Transactionservice
         $memberId = self::haveJoinMember($memberId);
 
         $successUpdate = self::calculateTransactionPayment($transaction, $memberId, $totalPurchase, $paymentAmount);
-        if (!$successUpdate) {
+        if (! $successUpdate) {
             throw new BadRequestHttpException('Gagal membuat transaksi');
         }
 
@@ -99,7 +99,7 @@ class Transactionservice
     public static function downloadInvoice(string $invoiceCode): mixed
     {
         $transaction = Transaction::where('invoice', $invoiceCode)->first();
-        if (!$transaction) {
+        if (! $transaction) {
             return false;
         }
 
@@ -186,7 +186,7 @@ class Transactionservice
         if ($memberId) {
             // check member exist
             $member = Pelanggan::where('id', $memberId)->first();
-            if (!$member) {
+            if (! $member) {
                 throw new BadRequestHttpException('Member tidak terdaftar pada sistem kami');
             }
 
@@ -219,13 +219,13 @@ class Transactionservice
         ]);
 
         // check detail transaction
-        if (!$transactionDetail) {
+        if (! $transactionDetail) {
             throw new BadRequestHttpException('Gagal menambahkan detail transaksi');
         }
 
         // update stok
         $success = $product->update(['stock' => $product->stock_pack - $jumlahBeli]);
-        if (!$success) {
+        if (! $success) {
             throw new BadRequestHttpException('Gagal mengubah sisa stok');
         }
 
@@ -239,7 +239,7 @@ class Transactionservice
     {
         $product = Product::where('id', $productId)->first();
 
-        if (!$product) {
+        if (! $product) {
             throw new BadRequestHttpException("Produk #{$productId} tidak ditemukan");
         }
 
@@ -263,7 +263,7 @@ class Transactionservice
         return Transaction::create([
             'kasir_id' => $user->id,
             'customer_id' => null,
-            'invoice' => 'TRX' . date('YmdHis'),
+            'invoice' => 'TRX'.date('YmdHis'),
             'date' => date('Y-m-d'),
             'total_price' => 0,
             'total_pay' => 0,
@@ -286,9 +286,9 @@ class Transactionservice
 
         $laba = json_decode(self::queryGetLaba($user, $tanggalAwal, $tanggalAkhir));
 
-        $tanggal = $tanggalAwal . ' sd ' . $tanggalAkhir;
+        $tanggal = $tanggalAwal.' sd '.$tanggalAkhir;
 
-        return Excel::download(new LabaExport($tanggal, $laba, $transactions), $tanggal . '.xlsx');
+        return Excel::download(new LabaExport($tanggal, $laba, $transactions), $tanggal.'.xlsx');
     }
 
     public static function report(User $user, ?string $tanggalAwal = null, ?string $tanggalAkhir = null)
@@ -308,7 +308,7 @@ class Transactionservice
             $transactions[$key]['total_price'] = CurrencyHelper::rupiah($t->total_price);
             $transactions[$key]['tanggal'] = date('d F Y, H:i', strtotime($t->created_at));
             $transactions[$key]['product'] = $product;
-            $transactions[$key]['jumlahTerjual'] = $t->jumlahTerjual . ' ' . $product->satuan_ecer;
+            $transactions[$key]['jumlahTerjual'] = $t->jumlahTerjual.' '.$product->satuan_ecer;
         }
 
         $laba = json_decode(self::queryGetLaba($user, $tanggalAwal, $tanggalAkhir));
