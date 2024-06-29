@@ -7,7 +7,7 @@ class SupplierRequest extends BaseFormRequest
     public function rules(): array
     {
         return [
-            'code' => 'required|string',
+            // 'code' => 'required|string',
             'name' => 'required|string',
             'phone' => 'required|string',
             'address' => 'required|string',

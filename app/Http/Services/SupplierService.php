@@ -33,14 +33,15 @@ class SupplierService
 
     public static function create(Request $request): bool
     {
-        $payload = $request->only('code', 'name', 'phone', 'address', 'status');
+        $payload = $request->only('name', 'phone', 'address', 'status');
+        $payload['code'] = "SPL" . time();
 
         return Supplier::create($payload) ? true : false;
     }
 
     public static function update(Supplier $supplier, Request $request): bool
     {
-        $payload = $request->only('code', 'name', 'phone', 'address', 'status');
+        $payload = $request->only('name', 'phone', 'address', 'status');
 
         return $supplier->update($payload);
     }

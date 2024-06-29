@@ -92,21 +92,7 @@ class ProductService
 
     public static function create(Request $request): bool
     {
-        $payload = $request->only(
-            'category_id',
-            'code',
-            'name',
-            'unit',
-            'stock',
-            'price_buy',
-            'price_sell',
-            'description',
-            'date',
-            'per_pack',
-            'per_item',
-            'unit_item',
-            'price_sell_item'
-        );
+        $payload = $request->validated();
 
         $responseUpload = RequestHelper::uploadImage($request->file('photo'), Product::getRelativePath());
         if (! $responseUpload['success']) {
@@ -120,21 +106,7 @@ class ProductService
 
     public static function update(Product $product, Request $request): bool
     {
-        $payload = $request->only(
-            'category_id',
-            'code',
-            'name',
-            'unit',
-            'stock',
-            'price_buy',
-            'price_sell',
-            'description',
-            'date',
-            'per_pack',
-            'per_item',
-            'unit_item',
-            'price_sell_item'
-        );
+        $payload = $request->validated();
         if ($request->hasFile('photo')) {
             $responseUpload = RequestHelper::uploadImage($request->file('photo'), Product::getRelativePath());
             if (! $responseUpload['success']) {
