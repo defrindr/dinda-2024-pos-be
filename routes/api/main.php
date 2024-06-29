@@ -4,7 +4,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\TransactionController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'main', 'middleare' => 'cors'], function () {
+Route::group(['prefix' => 'main', 'middleware' => 'cors'], function () {
     Route::get('dashboard/datacount', [DashboardController::class, 'dataCount']);
     Route::get('transaction/report', [TransactionController::class, 'report']);
     Route::get('transaction/export-excel', [TransactionController::class, 'reportExcel']);

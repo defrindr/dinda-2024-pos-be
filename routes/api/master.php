@@ -8,7 +8,7 @@ use App\Http\Controllers\Master\SupplierController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::group(['prefix' => 'master', 'middleare' => 'cors'], function () {
+Route::group(['prefix' => 'master', 'middleware' => 'cors'], function () {
     Route::resource('category', CategoryController::class);
     Route::resource('pelanggan', PelangganController::class);
     Route::resource('supplier', SupplierController::class);
