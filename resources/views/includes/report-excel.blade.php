@@ -7,7 +7,7 @@
         @if (auth()->user()->role != \App\Models\User::LEVEL_KASIR)
             <tr>
                 <td>Laba :</td>
-                <td>{{ \App\Helpers\Currencyhelper::rupiah($laba->total) }}</td>
+                <td>{{ \App\Helpers\CurrencyHelper::rupiah($laba->total) }}</td>
             </tr>
         @endif
     </tbody>
@@ -28,8 +28,8 @@
                 <td>{{ \App\Helpers\DateHelper::readableDate($detail->transaction->date) }}</td>
                 <td>{{ $detail->product->name }}</td>
                 <td>{{ $detail->quantity }}</td>
-                <td>{{ \App\Helpers\Currencyhelper::rupiah($detail->price) }}</td>
-                <td>{{ \App\Helpers\Currencyhelper::rupiah($detail->total_price) }}</td>
+                <td>{{ \App\Helpers\CurrencyHelper::rupiah($detail->price) }}</td>
+                <td>{{ \App\Helpers\CurrencyHelper::rupiah($detail->total_price) }}</td>
             </tr>
         @endforeach
     </tbody>
