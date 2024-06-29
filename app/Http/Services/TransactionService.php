@@ -224,7 +224,7 @@ class Transactionservice
         }
 
         // update stok
-        $success = $product->update(['stock' => $product->stock_pack - $jumlahBeli]);
+        $success = $product->update(['stock_pack' => $product->stock_pack - $jumlahBeli]);
         if (!$success) {
             throw new BadRequestHttpException('Gagal mengubah sisa stok');
         }
