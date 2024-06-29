@@ -13,10 +13,10 @@ class ProfilAplikasiSeeder extends Seeder
     public function run(): void
     {
         ProfilAplikasi::create([
-            'nama_aplikasi' => 'POS Dinda',
+            'nama_aplikasi' => 'Tokoku',
             'alamat' => 'Ds. Mojoagung Kab. Jombang',
             'no_telp' => '627361526345',
-            'website' => 'http://localhost',
+            'website' => 'http://',
             'logo' => '',
         ]);
     }

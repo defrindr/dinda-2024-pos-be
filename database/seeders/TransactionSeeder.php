@@ -17,7 +17,7 @@ class TransactionSeeder extends Seeder
      */
     public function run(): void
     {
-        $length = 100;
+        $length = 4;
 
         DB::beginTransaction();
 
