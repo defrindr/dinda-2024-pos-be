@@ -1,0 +1,92 @@
+#!/usr/bin/env php
+
+<?php
+
+/**
+ * WHAT IT IS:
+ * Tool untuk memindahkan file yang berubah pada suatu commit, untuk mempermudah upload file.
+ * HOW TO USE :
+ * ./mover [commit_start] [commit_end]
+ */
+
+
+// setup destination path
+$destination = "commit.mover";
+$newline = "\n";
+
+$commit_start = '';
+$commit_end = '';
+
+// function untuk memindahkan seluruh list file yang berubah ke folder baru
+function copyfiles($source, $destination, $list_file)
+{
+  if (!is_dir($source)) {
+    return false;
+  }
+
+  if (!is_dir($destination)) {
+    mkdir($destination, 0777, true);
+  }
+
+  foreach ($list_file as $file) {
+    $sourcefile = $source . "/" . $file;
+    $destinationfile = $destination . "/" . $file;
+
+    $destinationfiledir = explode("/", $destinationfile);
+    array_pop($destinationfiledir);
+    $destinationfiledir = implode("/", $destinationfiledir);
+
+    if (!is_dir($destinationfiledir)) {
+      mkdir($destinationfiledir, 0777, true);
+    }
+
+    if (is_file($sourcefile)) {
+      copy($sourcefile, $destinationfile);
+    }
+  }
+  return true;
+}
+
+
+// $commit from command argument
+if (isset($argv[1])) {
+  $commit_start = $argv[1];
+  if (isset($argv[2])) {
+    $commit_end = $argv[2];
+  }
+} else {
+  die("No commit specified" . PHP_EOL);
+}
+
+$list_commit = [];
+$list_commit[] = $commit_start;
+
+if ($commit_end !== '') {
+  $response = shell_exec("git rev-list --ancestry-path $commit_start...$commit_end");
+  if ($response) {
+    $hashes = explode($newline, $response);
+
+    $hashes = array_reverse($hashes); // reverse array, karena output defaultnya dari yang terbaru
+    foreach ($hashes as $hash) {
+      if ($hash !== '') {
+        $list_commit[] = $hash;
+      }
+    }
+  }
+}
+
+foreach ($list_commit as $commit) {
+  // get list files from git specific commit
+  $list_file = shell_exec("git diff-tree --no-commit-id --name-only -r $commit");
+
+  if ($list_file) {
+    // split files by new line
+    $list_file = explode(PHP_EOL, $list_file);
+    // remove empty lines
+    $list_file = array_filter($list_file);
+
+    copyfiles(".", $destination, $list_file);
+  } else {
+    echo "CANNOT READ COMMIT" . PHP_EOL;
+  }
+}
