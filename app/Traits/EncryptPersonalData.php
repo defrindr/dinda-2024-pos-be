@@ -2,9 +2,9 @@
 
 namespace App\Traits;
 
+use App\Helpers\SimpleRSA;
+use Exception;
 use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Encryption\Encrypter;
-use Illuminate\Support\Str;
 
 /**
  * EncryptPersonalData
@@ -22,7 +22,7 @@ trait EncryptPersonalData
     {
         if (in_array($key, $this->encryptable)) {
             $keyEncryption = $this->getKeyEncryption();
-            $encrypter = new Encrypter(key: $keyEncryption, cipher: config('app.cipher'));
+            $encrypter = new SimpleRSA($keyEncryption);
 
             if (parent::getAttribute($key)) {
                 try {
@@ -42,7 +42,7 @@ trait EncryptPersonalData
     {
         if (in_array($key, $this->encryptable)) {
             $keyEncryption = $this->getKeyEncryption();
-            $encrypter = new Encrypter(key: $keyEncryption, cipher: config('app.cipher'));
+            $encrypter = new SimpleRSA($keyEncryption);
 
             $value = $encrypter->encrypt($value);
         }
@@ -53,16 +53,12 @@ trait EncryptPersonalData
     public function getKeyEncryption()
     {
         if (property_exists($this, 'saltcolumn')) {
-            if (! parent::getAttribute($this->saltcolumn)) {
-                $keyEncryption = Str::random(22);
-                parent::setAttribute($this->saltcolumn, base64_encode($keyEncryption));
+            if (!parent::getAttribute($this->saltcolumn)) {
+                $keyEncryption = (new SimpleRSA())->getPayload();
+                parent::setAttribute($this->saltcolumn, $keyEncryption);
             } else {
                 $keyEncryption = parent::getAttribute($this->saltcolumn);
-                $keyEncryption = base64_decode($keyEncryption);
             }
-
-            // add prefix
-            $keyEncryption .= 'ComeAndDie';
         } else {
             $keyEncryption = $this->keyEncryption;
         }
@@ -78,11 +74,11 @@ trait EncryptPersonalData
             if (in_array($key, $this->encryptable)) {
 
                 $keyEncryption = $this->getKeyEncryption();
-                $encrypter = new Encrypter(key: $keyEncryption, cipher: config('app.cipher'));
+                $encrypter = new SimpleRSA($keyEncryption);
 
                 try {
                     $decrypted = $encrypter->decrypt($value);
-                } catch (DecryptException $exception) {
+                } catch (Exception $exception) {
                     $decrypted = $value;
                 }
 
