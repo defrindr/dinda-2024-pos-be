@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\EncryptPersonalData;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends BaseModel
 {
-    use HasFactory, SoftDeletes;
+    use EncryptPersonalData, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'code',
@@ -17,6 +18,12 @@ class Supplier extends BaseModel
         'address',
         'status',
     ];
+
+    protected $hidden = ['salt'];
+
+    protected $encryptable = ['name', 'phone', 'address'];
+
+    protected $saltcolumn = 'salt';
 
     protected $casts = [
         'created_at' => 'datetime',

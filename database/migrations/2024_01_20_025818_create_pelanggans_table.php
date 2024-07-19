@@ -17,7 +17,7 @@ class CreatePelanggansTable extends Migration
             $table->id();
             $table->string('code');
             $table->binary('nik');
-            $table->string('name');
+            $table->binary('name');
             $table->binary('phone');
             $table->binary('address');
             $table->binary('dob');
