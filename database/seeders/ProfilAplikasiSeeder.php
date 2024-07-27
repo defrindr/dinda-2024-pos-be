@@ -14,7 +14,7 @@ class ProfilAplikasiSeeder extends Seeder
     {
         ProfilAplikasi::create([
             'nama_aplikasi' => 'Tokoku',
-            'alamat' => 'Ds. Mojoagung Kab. Jombang',
+            'alamat' => 'Mlarak Ponorogo',
             'no_telp' => '627361526345',
             'website' => 'http://',
             'logo' => '',
