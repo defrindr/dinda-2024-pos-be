@@ -21,7 +21,13 @@ class Supplier extends BaseModel
 
     protected $hidden = ['salt'];
 
-    protected $encryptable = ['name', 'phone', 'address'];
+    protected $encryptable = [
+        'code',
+        'name',
+        'phone',
+        'address',
+        'status',
+    ];
 
     protected $saltcolumn = 'salt';
 

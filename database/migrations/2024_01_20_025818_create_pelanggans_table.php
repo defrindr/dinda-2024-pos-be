@@ -16,11 +16,11 @@ class CreatePelanggansTable extends Migration
         Schema::create('pelanggans', function (Blueprint $table) {
             $table->id();
             $table->string('code');
-            $table->binary('nik');
-            $table->binary('name');
-            $table->binary('phone');
-            $table->binary('address');
-            $table->binary('dob');
+            $table->text('nik');
+            $table->text('name');
+            $table->text('phone');
+            $table->text('address');
+            $table->text('dob');
             $table->enum('gender', ['L', 'P']);
             $table->string('salt');
             $table->enum('status', ['active', 'nonactive']);

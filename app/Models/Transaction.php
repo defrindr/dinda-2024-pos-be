@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Traits\EncryptPersonalData;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Transaction extends BaseModel
 {
-    use HasFactory, SoftDeletes;
+    use EncryptPersonalData, HasFactory, SoftDeletes;
 
     protected $fillable = [
         'kasir_id',
@@ -20,6 +21,19 @@ class Transaction extends BaseModel
         'total_return',
         'created_at',
     ];
+
+    protected $hidden = ['salt'];
+
+    protected $encryptable = [
+        'invoice',
+        'date',
+        'total_price',
+        'total_pay',
+        'total_return',
+    ];
+
+    protected $saltcolumn = 'salt';
+
 
     protected $casts = [
         'created_at' => 'datetime',

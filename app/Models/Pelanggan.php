@@ -24,7 +24,16 @@ class Pelanggan extends BaseModel
 
     protected $hidden = ['salt'];
 
-    protected $encryptable = ['nik', 'name', 'phone', 'address', 'dob'];
+    protected $encryptable = [
+        'code',
+        'nik',
+        'name',
+        'phone',
+        'address',
+        'gender',
+        'dob',
+        'status',
+    ];
 
     protected $saltcolumn = 'salt';
 
