@@ -36,10 +36,12 @@ class SimpleRSA
   public function encrypt($plainText)
   {
     $bytes = [];
-    foreach (str_split($plainText) as $chr) {
-      $ordChr = ord($chr);
-      $byte = bcpowmod($ordChr, $this->publicKey, $this->n);
-      $bytes[] = $byte;
+    if ($plainText) {
+      foreach (str_split($plainText) as $chr) {
+        $ordChr = ord($chr);
+        $byte = bcpowmod($ordChr, $this->publicKey, $this->n);
+        $bytes[] = $byte;
+      }
     }
     return implode(":", $bytes);
   }
