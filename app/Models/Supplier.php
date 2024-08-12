@@ -26,7 +26,7 @@ class Supplier extends BaseModel
         'name',
         'phone',
         'address',
-        'status',
+        // 'status',
     ];
 
     protected $saltcolumn = 'salt';

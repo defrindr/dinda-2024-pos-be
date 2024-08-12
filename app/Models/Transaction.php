@@ -27,9 +27,9 @@ class Transaction extends BaseModel
     protected $encryptable = [
         'invoice',
         'date',
-        'total_price',
-        'total_pay',
-        'total_return',
+        // 'total_price',
+        // 'total_pay',
+        // 'total_return',
     ];
 
     protected $saltcolumn = 'salt';

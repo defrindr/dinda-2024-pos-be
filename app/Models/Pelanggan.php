@@ -30,9 +30,7 @@ class Pelanggan extends BaseModel
         'name',
         'phone',
         'address',
-        'gender',
-        'dob',
-        'status',
+        'dob'
     ];
 
     protected $saltcolumn = 'salt';

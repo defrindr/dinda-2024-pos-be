@@ -18,10 +18,11 @@ class CreateTransactionsTable extends Migration
             $table->foreignId('kasir_id')->references('id')->on('users');
             $table->foreignId('customer_id')->nullable()->references('id')->on('pelanggans');
             $table->string('invoice');
-            $table->date('date');
+            $table->text('date');
             $table->unsignedBigInteger('total_price');
             $table->unsignedBigInteger('total_pay');
             $table->unsignedBigInteger('total_return');
+            $table->string('salt');
             $table->timestamps();
             $table->softDeletes();
         });
